@@ -105,6 +105,22 @@ export type AuraCardRow = {
   created_at: string;
 };
 
+export type CorrectionTarget = 'season' | 'face_shape' | 'undertone' | 'all';
+
+/** Training labels written by the API; read here to show which card fields the user set. */
+export type CardCorrectionRow = {
+  id: string;
+  user_id: string;
+  card_id: string;
+  scan_id: string | null;
+  target: CorrectionTarget;
+  predicted: string;
+  corrected_to: string | null;
+  model_version: string;
+  usable_label: boolean;
+  created_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -135,6 +151,12 @@ export type Database = {
       };
       aura_cards: {
         Row: AuraCardRow;
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      card_corrections: {
+        Row: CardCorrectionRow;
         Insert: never;
         Update: never;
         Relationships: [];

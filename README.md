@@ -6,7 +6,8 @@ a diary of what you actually wear. Your guide is **Mira**, a mirror ghost.
 
 Built for Filipino users, launching on Google Play.
 
-> **Status:** in development. Steps 1–6 of 13 are done (see [Roadmap](#roadmap)).
+> **Status:** in development. Steps 1–8 of 13 are done (see [Roadmap](#roadmap)). The face-shape
+> model is **not cleared for launch** yet: it fails the per-skin-tone fairness gate.
 
 ---
 
@@ -49,9 +50,10 @@ The full rule set is in [`AURA-BRIEF.md`](AURA-BRIEF.md#3-hard-rules).
 │   ├── app/
 │   │   ├── routers/        HTTP endpoints (health, scan)
 │   │   ├── schemas/        Pydantic request/response models
-│   │   ├── ml/             Classifiers and palettes
+│   │   ├── ml/             Face-shape model, colour rules, palettes, reports
 │   │   ├── auth.py         Supabase JWT verification (JWKS)
 │   │   └── supabase_rest.py  PostgREST client that acts as the user
+│   ├── training/           Dataset feature extraction + model training
 │   └── tests/
 ├── web/                    React app
 │   ├── public/mediapipe/   Face model (committed) + WASM runtime (generated)
@@ -150,6 +152,30 @@ CI runs both on every push and pull request (`.github/workflows/ci.yml`).
 - The five face ratios are defined in [`web/src/lib/face/ratios.ts`](web/src/lib/face/ratios.ts).
   The step 7 model trains on the same definitions, so change both together.
 
+## Training the face-shape model
+
+The API serves `api/app/ml/models/face_shape.joblib` (committed). To retrain:
+
+1. Download the [Kaggle face shape dataset](https://www.kaggle.com/datasets/niten19/face-shape-dataset)
+   and unzip it to `data/face-shape/` (with `training_set/` and `testing_set/` inside).
+   `data/` is gitignored. **Check the dataset licence before shipping a model trained on it.**
+2. From `api/`:
+   ```bash
+   pip install -r requirements-train.txt
+   python -m training.extract_features    # MediaPipe on every image → data/features/*.csv (~5 min)
+   python -m training.train_face_shape    # CV model selection, calibration, held-out evaluation
+   ```
+3. Review `api/app/ml/reports/<version>.md`, then run `db/metrics/<version>.sql` in the
+   Supabase SQL editor to record the metrics (`model_metrics` is service-role only).
+
+Training measures images with [`app/ml/features.py`](api/app/ml/features.py), a Python twin of
+the app's TypeScript measurement code. It uses the same landmarks, formulas, resize and pose
+filters, so the model trains on exactly what the app sends. Change both sides together.
+
+**Launch gate (hard rule 11):** every Monk band needs at least 30 labelled test faces, and the
+accuracy gap between bands must be 5 points or less. Until then the report says ⛔ BLOCKED and
+the API logs a warning at startup.
+
 ## Mira artwork
 
 Mira is supplied art, not generated. Put one PNG per expression in `web/public/mira/`:
@@ -191,8 +217,8 @@ AURA tokens work. Utility names are short aliases: `rounded-md` is **20px**, and
 | 4 | Consent + capture: consent log, camera with face oval, canvas only | ✅ |
 | 5 | Landmarks: MediaPipe ratios, cheek LAB, Monk band, lighting score | ✅ |
 | 6 | Scan endpoint + Aura Card (rule-based stub), undertone quiz fallback | ✅ |
-| 7 | Face shape model, with accuracy per Monk band | ⏳ |
-| 8 | Correction loop ("this doesn't look like me") | ⏳ |
+| 7 | Face shape model, with accuracy per Monk band | ✅ (⛔ launch gate) |
+| 8 | Correction loop ("this doesn't look like me") | ✅ |
 | 9 | Closet: quick start, grid, item detail, wear log | ⏳ |
 | 10 | Garment tagging: background removal, CLIP, colours | ⏳ |
 | 11 | Outfits + Today (weather-aware) | ⏳ |
@@ -201,10 +227,15 @@ AURA tokens work. Utility names are short aliases: `rounded-md` is **20px**, and
 
 ### Known limitations
 
-- Face shape and season come from **uncalibrated rule-based thresholds** until step 7, so
-  confidences are deliberately modest (55–80%).
-- The lighting score hasn't been validated across Monk bands yet. Step 7's per-band metrics
-  check that deeper skin tones aren't routed to the quiz more often.
+- **Face shape:** a calibrated random forest, about 57% accurate on held-out faces (chance is
+  20%). It mostly confuses heart with oval and round with square. Confidence is calibrated, so
+  the app shows roughly what the model really knows.
+- **Fairness gate blocked:** the dataset is mostly Monk bands 5–6. Bands 3, 9 and 10 have no
+  test faces, and 1, 4 and 8 have almost none. More diverse labelled faces (including
+  `card_corrections` from real users) are needed before launch.
+- **Colour season** is still rule-based (confidence capped at 80%). User corrections are being
+  collected as labels for a future model.
+- The lighting score hasn't been validated across Monk bands yet.
 - Forgot password isn't built yet.
 
 ## Conventions

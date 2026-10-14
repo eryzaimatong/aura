@@ -31,6 +31,26 @@ export const SEASON_BLURBS: Record<ColorSeason, string> = {
   deep_winter: 'Deep, cool and dramatic. Plum, ink navy and pine green.',
 };
 
+/** Sister seasons in the 12-season system — the likeliest alternatives when one feels off. */
+export const NEIGHBOUR_SEASONS: Record<ColorSeason, [ColorSeason, ColorSeason, ColorSeason]> = {
+  light_spring: ['light_summer', 'true_spring', 'bright_spring'],
+  true_spring: ['light_spring', 'bright_spring', 'true_autumn'],
+  bright_spring: ['true_spring', 'bright_winter', 'light_spring'],
+  light_summer: ['light_spring', 'true_summer', 'soft_summer'],
+  true_summer: ['light_summer', 'soft_summer', 'true_winter'],
+  soft_summer: ['soft_autumn', 'true_summer', 'light_summer'],
+  soft_autumn: ['soft_summer', 'true_autumn', 'deep_autumn'],
+  true_autumn: ['soft_autumn', 'deep_autumn', 'true_spring'],
+  deep_autumn: ['deep_winter', 'true_autumn', 'soft_autumn'],
+  true_winter: ['deep_winter', 'bright_winter', 'true_summer'],
+  bright_winter: ['bright_spring', 'true_winter', 'deep_winter'],
+  deep_winter: ['deep_autumn', 'true_winter', 'bright_winter'],
+};
+
+export const ALL_SEASONS = Object.keys(SEASON_NAMES) as ColorSeason[];
+export const ALL_FACE_SHAPES: FaceShape[] = ['heart', 'oblong', 'oval', 'round', 'square'];
+export const ALL_UNDERTONES: Undertone[] = ['cool', 'warm', 'neutral'];
+
 export const FACE_SHAPE_NAMES: Record<FaceShape, string> = {
   heart: 'Heart',
   oblong: 'Oblong',

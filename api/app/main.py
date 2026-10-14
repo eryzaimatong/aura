@@ -1,10 +1,22 @@
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import APP_VERSION, settings
-from app.routers import health, scan
+from app.ml import face_shape
+from app.routers import cards, health, scan
 
-app = FastAPI(title="AURA API", version=APP_VERSION)
+
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    # Load the face-shape model at boot (~2 s) so the first scan isn't the slow one.
+    face_shape.model_version()
+    yield
+
+
+app = FastAPI(title="AURA API", version=APP_VERSION, lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -16,3 +28,4 @@ app.add_middleware(
 
 app.include_router(health.router)
 app.include_router(scan.router)
+app.include_router(cards.router)

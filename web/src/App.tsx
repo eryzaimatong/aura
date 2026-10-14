@@ -8,11 +8,8 @@ import { PrivacyNoticeScreen } from './screens/PrivacyNoticeScreen';
 import { ComponentsScreen } from './screens/components/ComponentsScreen';
 import { AuraCardScreen } from './screens/mirror/card/AuraCardScreen';
 import { ConsentScreen } from './screens/mirror/ConsentScreen';
+import { CorrectionScreen } from './screens/mirror/correct/CorrectionScreen';
 import { RequireScanConsent } from './screens/mirror/RequireScanConsent';
-import { SplashScreen } from './screens/SplashScreen';
-
-// MediaPipe is ~400 KB of JS: load it only when someone actually scans.
-const ScanScreen = lazy(() => import('./screens/mirror/scan/ScanScreen').then((m) => ({ default: m.ScanScreen })));
 import { UndertoneQuizScreen } from './screens/mirror/UndertoneQuizScreen';
 import { AgeBlockedScreen } from './screens/onboarding/AgeBlockedScreen';
 import { AgeCheckScreen } from './screens/onboarding/AgeCheckScreen';
@@ -21,6 +18,10 @@ import { GuardianScreen } from './screens/onboarding/GuardianScreen';
 import { LoginScreen } from './screens/onboarding/LoginScreen';
 import { SignUpScreen } from './screens/onboarding/SignUpScreen';
 import { WelcomeScreen } from './screens/onboarding/WelcomeScreen';
+import { SplashScreen } from './screens/SplashScreen';
+
+// MediaPipe is ~400 KB of JS: load it only when someone actually scans.
+const ScanScreen = lazy(() => import('./screens/mirror/scan/ScanScreen').then((m) => ({ default: m.ScanScreen })));
 
 export default function App() {
   return (
@@ -54,6 +55,7 @@ export default function App() {
             </Route>
             <Route path="/mirror/quiz" element={<UndertoneQuizScreen />} />
             <Route path="/mirror/card" element={<AuraCardScreen />} />
+            <Route path="/mirror/correct" element={<CorrectionScreen />} />
           </Route>
 
           {/* Readable signed in or out. */}

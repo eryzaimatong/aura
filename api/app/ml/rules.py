@@ -1,9 +1,10 @@
 """
-Rule-based stub classifiers.
+Rule-based classifiers.
 
-TODO(step 7): replace classify_face_shape with the trained model (same five ratios
-as features). Thresholds below are uncalibrated starting points, which is why the
-confidences they return stay modest.
+- Face shape: fallback only. The trained model (app/ml/face_shape.py) is used when
+  its file is present.
+- Colour season/undertone: still rule-based. TODO: train once corrections (step 8)
+  give real labels. Thresholds are uncalibrated, so confidences are capped.
 """
 
 import math
@@ -12,10 +13,14 @@ from dataclasses import dataclass
 from app.ml.palettes import PALETTES
 from app.schemas.scan import ColorSeason, FaceShape, LandmarkRatios, UndertoneAnswers, Undertone
 
-MODEL_VERSION = "rules-0.1"
+COLOR_VERSION = "color-rules-0.1"
 
 # Below this, colour is not trusted: no season is shown, the quiz takes over.
 COLOR_CONF_MIN = 0.55
+
+# Uncalibrated rules can't justify near-certainty, whatever the lighting (hard rule 10:
+# shown confidence must be honest). Same ceiling as the shape rules. Lift in step 7.
+STUB_CONF_MAX = 0.8
 
 
 def _clamp(x: float, lo: float = 0.0, hi: float = 1.0) -> float:
@@ -105,7 +110,7 @@ def season_for(undertone: Undertone, lab_skin: tuple[float, float, float],
 def classify_color(lab_skin: tuple[float, float, float], lab_eye: tuple[float, float, float] | None,
                    lighting_score: float) -> ColorResult:
     undertone, margin = undertone_from_lab(lab_skin)
-    confidence = round(lighting_score * (0.6 + 0.4 * margin), 2)
+    confidence = round(min(STUB_CONF_MAX, lighting_score * (0.6 + 0.4 * margin)), 2)
     return ColorResult(undertone, season_for(undertone, lab_skin, lab_eye), confidence)
 
 

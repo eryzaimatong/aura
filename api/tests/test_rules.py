@@ -45,6 +45,11 @@ def test_low_light_drops_confidence_below_threshold():
     assert good.confidence >= COLOR_CONF_MIN > bad.confidence
 
 
+def test_stub_color_confidence_is_capped():
+    perfect = classify_color((60, 5, 30), None, lighting_score=1.0)
+    assert perfect.confidence <= 0.8
+
+
 def test_quiz_majority():
     assert undertone_from_quiz(UndertoneAnswers(veins="blue", metal="silver", sun="burn")) == ("cool", 0.75)
     assert undertone_from_quiz(UndertoneAnswers(veins="green", metal="gold", sun="burn_then_tan"))[0] == "warm"

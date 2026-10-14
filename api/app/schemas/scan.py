@@ -2,7 +2,7 @@
 
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 FaceShape = Literal["heart", "oblong", "oval", "round", "square"]
 Undertone = Literal["cool", "warm", "neutral"]
@@ -67,6 +67,25 @@ class ScanOut(BaseModel):
     # Hard rule 10: low colour confidence goes to the undertone quiz, never a guess.
     needs_quiz: bool
     color_conf: float
+
+
+NotSure = Literal["not_sure"]
+
+
+class CorrectionIn(BaseModel):
+    """What the user says is off. Each field present becomes one card_corrections row."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    face_shape: FaceShape | NotSure | None = None
+    season: ColorSeason | NotSure | None = None
+    undertone: Undertone | NotSure | None = None
+
+    @model_validator(mode="after")
+    def _at_least_one(self) -> "CorrectionIn":
+        if self.face_shape is None and self.season is None and self.undertone is None:
+            raise ValueError("pick at least one thing to correct")
+        return self
 
 
 class UndertoneAnswers(BaseModel):

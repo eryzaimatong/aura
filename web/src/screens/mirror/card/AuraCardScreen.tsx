@@ -63,8 +63,15 @@ export function AuraCardScreen() {
       <ScreenHeader title="Your Aura Card" backTo="/" />
       <AuraCardFace card={card} />
       <div className="mt-4">
-        <ConfidencePanel card={card} scan={scan} />
+        <ConfidencePanel card={card} scan={scan} userSet={state.userSet} />
       </div>
+      <button
+        type="button"
+        onClick={() => navigate('/mirror/correct')}
+        className="mt-4 self-center text-label font-bold text-gold-deep underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-deep"
+      >
+        This doesn’t look like me
+      </button>
 
       {import.meta.env.DEV && scan && (
         <details className="mt-4 rounded-sm bg-sand p-3 text-micro text-cocoa-soft">

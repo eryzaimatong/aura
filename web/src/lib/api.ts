@@ -1,4 +1,4 @@
-import type { AuraCardRow } from './database.types';
+import type { AuraCardRow, ColorSeason, FaceShape, Undertone } from './database.types';
 import type { ScanMeasurements } from './face/analyze';
 import { supabase } from './supabase';
 
@@ -64,6 +64,19 @@ export interface UndertoneAnswers {
   veins: 'blue' | 'green' | 'unsure';
   metal: 'silver' | 'gold' | 'both';
   sun: 'burn' | 'tan' | 'burn_then_tan';
+}
+
+type NotSure = 'not_sure';
+
+/** "This doesn't look like me" — each field sent becomes a training label (hard rule 12). */
+export interface CorrectionRequest {
+  face_shape?: FaceShape | NotSure;
+  season?: ColorSeason | NotSure;
+  undertone?: Undertone | NotSure;
+}
+
+export function postCorrection(body: CorrectionRequest): Promise<AuraCard> {
+  return request<AuraCard>('/api/cards/current/correction', { method: 'POST', auth: true, body: JSON.stringify(body) });
 }
 
 export function postUndertoneQuiz(answers: UndertoneAnswers): Promise<AuraCard> {

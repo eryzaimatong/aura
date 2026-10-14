@@ -15,3 +15,6 @@ desktop.ini
 # Logs
 *.log
 npm-debug.log*
+
+# Datasets and training outputs (large, third-party licensed — never committed)
+data/

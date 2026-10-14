@@ -22,7 +22,7 @@ GOOD_SCAN = {
 class FakeDb:
     def __init__(self, consent: dict[str, Any] | None):
         self.consent = consent
-        self.rows: dict[str, list[dict[str, Any]]] = {"scans": [], "aura_cards": [], "undertone_quiz": []}
+        self.rows: dict[str, list[dict[str, Any]]] = {"scans": [], "aura_cards": [], "undertone_quiz": [], "card_corrections": []}
 
     async def select(self, table: str, params: dict[str, str]) -> list[dict[str, Any]]:
         if table == "consents":
@@ -65,7 +65,7 @@ def test_scan_creates_card(make_client):
     body = res.json()
     assert body["needs_quiz"] is False
     assert body["card"]["season"] is not None and len(body["card"]["palette"]) == 5
-    assert db.rows["scans"][0]["model_version"] == "rules-0.1"
+    assert db.rows["scans"][0]["model_version"].endswith("+color-rules-0.1")
 
 
 def test_low_light_routes_to_quiz_without_guessing(make_client):
@@ -125,3 +125,46 @@ def test_scan_requires_sign_in():
     app.dependency_overrides.clear()
     res = TestClient(app).post("/api/scan", json=GOOD_SCAN)
     assert res.status_code == 401
+
+
+# ---------- correction loop (step 8) ----------
+
+def test_correction_logs_label_and_updates_card(make_client):
+    client, db = make_client()
+    client.post("/api/scan", json=GOOD_SCAN)
+    before = dict(db.rows["aura_cards"][-1])
+    new_shape = "round" if before["face_shape"] != "round" else "oval"
+    res = client.post("/api/cards/current/correction", json={"face_shape": new_shape, "season": "deep_winter"})
+    assert res.status_code == 200, res.text
+    card = res.json()
+    assert card["face_shape"] == new_shape and card["season"] == "deep_winter"
+    assert card["source"] == "user_corrected" and len(card["palette"]) == 5
+    labels = {c["target"]: c for c in db.rows["card_corrections"]}
+    assert labels["face_shape"]["predicted"] == before["face_shape"]
+    assert labels["face_shape"]["corrected_to"] == new_shape
+    # Hard rule 12: the label carries the model version that made the prediction.
+    assert labels["season"]["model_version"] == db.rows["scans"][0]["model_version"]
+
+
+def test_not_sure_is_logged_but_changes_nothing(make_client):
+    client, db = make_client()
+    client.post("/api/scan", json=GOOD_SCAN)
+    before = dict(db.rows["aura_cards"][-1])
+    card = client.post("/api/cards/current/correction", json={"season": "not_sure"}).json()
+    assert card["season"] == before["season"] and card["source"] == "model"
+    assert db.rows["card_corrections"][0]["corrected_to"] is None
+
+
+def test_undertone_change_rederives_season_and_palette(make_client):
+    client, _ = make_client()
+    client.post("/api/scan", json=GOOD_SCAN)  # warm skin
+    card = client.post("/api/cards/current/correction", json={"undertone": "cool"}).json()
+    assert card["skin_undertone"] == "cool"
+    assert "summer" in card["season"] or "winter" in card["season"]
+
+
+def test_empty_or_unknown_correction_rejected(make_client):
+    client, _ = make_client()
+    client.post("/api/scan", json=GOOD_SCAN)
+    assert client.post("/api/cards/current/correction", json={}).status_code == 422
+    assert client.post("/api/cards/current/correction", json={"season": "autumn"}).status_code == 422
