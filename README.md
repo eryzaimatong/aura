@@ -6,7 +6,7 @@ a diary of what you actually wear. Your guide is **Mira**, a mirror ghost.
 
 Built for Filipino users, launching on Google Play.
 
-> **Status:** in development. Steps 1–8 of 13 are done (see [Roadmap](#roadmap)). The face-shape
+> **Status:** in development. Steps 1–10 of 13 are done (see [Roadmap](#roadmap)). The face-shape
 > model is **not cleared for launch** yet: it fails the per-skin-tone fairness gate.
 
 ---
@@ -48,7 +48,7 @@ The full rule set is in [`AURA-BRIEF.md`](AURA-BRIEF.md#3-hard-rules).
 .
 ├── api/                    FastAPI backend
 │   ├── app/
-│   │   ├── routers/        HTTP endpoints (health, scan)
+│   │   ├── routers/        HTTP endpoints (health, scan, cards, items)
 │   │   ├── schemas/        Pydantic request/response models
 │   │   ├── ml/             Face-shape model, colour rules, palettes, reports
 │   │   ├── auth.py         Supabase JWT verification (JWKS)
@@ -88,6 +88,9 @@ The full rule set is in [`AURA-BRIEF.md`](AURA-BRIEF.md#3-hard-rules).
    off **Confirm email** so test signups log in straight away. Turn it back on (with custom
    SMTP) before release.
 
+4. Create a **private** Storage bucket named `closet` (5 MB limit, MIME type `image/webp`),
+   then run `db/004_closet_storage.sql` so each user can only reach their own folder.
+
 ### 2. Run the API
 
 ```bash
@@ -95,9 +98,13 @@ cd api
 python3.11 -m venv .venv            # Windows: py -3.11 -m venv .venv
 source .venv/bin/activate           # Windows: .venv\Scripts\activate
 pip install -r requirements-dev.txt
+python -m app.ml.download_models    # CLIP image encoder (89 MB, checksum-verified)
 cp .env.example .env                # then fill in the values below
 uvicorn app.main:app --reload
 ```
+
+Without the downloaded model, the API still runs: `/api/items/tag` answers 503 and the app
+falls back to manual tagging.
 
 The API runs on <http://localhost:8000>. Check it at <http://localhost:8000/health>.
 
@@ -176,6 +183,23 @@ filters, so the model trains on exactly what the app sends. Change both sides to
 accuracy gap between bands must be 5 points or less. Until then the report says ⛔ BLOCKED and
 the API logs a warning at startup.
 
+## Garment tagging
+
+`POST /api/items/tag` takes a clothing photo (never a selfie) and returns suggestions. Nothing
+is stored until the user saves the item.
+
+1. **Cut-out:** rembg's `u2netp` model (ONNX, 4.6 MB, committed) produces a transparent WebP.
+2. **Embedding:** CLIP ViT-B/32 image encoder (ONNX, int8, 89 MB, downloaded) produces the 512-d
+   vector stored in `closet_items.embedding`.
+3. **Category:** zero-shot against precomputed text embeddings in
+   `app/ml/models/clip_prompts.npz`. After editing the vocabulary in `app/ml/taxonomy.py`, run
+   `python -m training.build_clip_prompts` (needs `requirements-train.txt`).
+4. **Colours:** k-means in CIELAB on the cut-out, named for shoppers, and matched against the
+   user's Aura Card palette. The verdict always comes with a reason.
+
+There's no PyTorch: everything runs on `onnxruntime`. Tagging takes about 2 s per photo on a
+4-core laptop.
+
 ## Mira artwork
 
 Mira is supplied art, not generated. Put one PNG per expression in `web/public/mira/`:
@@ -200,7 +224,7 @@ AURA tokens work. Utility names are short aliases: `rounded-md` is **20px**, and
 | Setting | Value |
 |---|---|
 | Root directory | `api` |
-| Build command | `pip install -r requirements.txt` |
+| Build command | `pip install -r requirements.txt && python -m app.ml.download_models` |
 | Start command | `uvicorn app.main:app --host 0.0.0.0 --port $PORT` |
 | Python version | from `api/.python-version` (3.11) |
 | Environment | `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `CORS_ORIGINS` |
@@ -219,8 +243,8 @@ AURA tokens work. Utility names are short aliases: `rounded-md` is **20px**, and
 | 6 | Scan endpoint + Aura Card (rule-based stub), undertone quiz fallback | ✅ |
 | 7 | Face shape model, with accuracy per Monk band | ✅ (⛔ launch gate) |
 | 8 | Correction loop ("this doesn't look like me") | ✅ |
-| 9 | Closet: quick start, grid, item detail, wear log | ⏳ |
-| 10 | Garment tagging: background removal, CLIP, colours | ⏳ |
+| 9 | Closet: quick start, grid, item detail, wear log | ✅ |
+| 10 | Garment tagging: background removal, CLIP, colours | ✅ |
 | 11 | Outfits + Today (weather-aware) | ⏳ |
 | 12 | Diary: streaks, utilisation, insights | ⏳ |
 | 13 | Capacitor Android build | ⏳ |
@@ -236,6 +260,11 @@ AURA tokens work. Utility names are short aliases: `rounded-md` is **20px**, and
 - **Colour season** is still rule-based (confidence capped at 80%). User corrections are being
   collected as labels for a future model.
 - The lighting score hasn't been validated across Monk bands yet.
+- **Garment tagging speed:** about 2 s per photo on 4 cores. Render's free tier has a fraction
+  of one CPU, so expect 10 s or more there. Plan on a paid instance, or move the cut-out
+  on-device.
+- Tagging works best on one item laid flat or hung up. In photos of a person wearing an outfit,
+  skin and other pieces leak into the colours and category.
 - Forgot password isn't built yet.
 
 ## Conventions

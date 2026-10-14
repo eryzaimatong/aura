@@ -121,6 +121,67 @@ export type CardCorrectionRow = {
   created_at: string;
 };
 
+export type Seasonality = 'warm' | 'cool' | 'all';
+
+export interface DominantColor {
+  hex: string;
+  pct: number;
+  /** Shopper-friendly name, e.g. "cream" (added by the tagger). */
+  name?: string;
+}
+
+/** Hard rule 8: no price field, by design. */
+export type ClosetItemRow = {
+  id: string;
+  user_id: string;
+  name: string;
+  category: ItemCategory;
+  subcategory: string | null;
+  image_path: string;
+  dominant_colors: DominantColor[];
+  lab_primary: [number, number, number] | null;
+  in_palette: boolean | null;
+  auto_tagged: boolean;
+  seasonality: Seasonality | null;
+  archived: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ClosetItemInsert = {
+  user_id: string;
+  name: string;
+  category: ItemCategory;
+  subcategory?: string | null;
+  image_path: string;
+  dominant_colors?: DominantColor[];
+  lab_primary?: [number, number, number] | null;
+  in_palette?: boolean | null;
+  /** pgvector literal, e.g. "[0.01,-0.2,…]" (512 values). */
+  embedding?: string | null;
+  auto_tagged?: boolean;
+  seasonality?: Seasonality | null;
+};
+
+export type WearLogRow = {
+  id: string;
+  user_id: string;
+  item_id: string;
+  outfit_id: string | null;
+  worn_on: string;
+  created_at: string;
+};
+
+export type WearStatsRow = {
+  item_id: string;
+  user_id: string;
+  name: string;
+  category: ItemCategory;
+  wear_count: number;
+  last_worn: string | null;
+  created_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -161,8 +222,25 @@ export type Database = {
         Update: never;
         Relationships: [];
       };
+      closet_items: {
+        Row: ClosetItemRow;
+        Insert: ClosetItemInsert;
+        Update: Partial<Omit<ClosetItemInsert, 'user_id'>> & { archived?: boolean };
+        Relationships: [];
+      };
+      wear_log: {
+        Row: WearLogRow;
+        Insert: { user_id: string; item_id: string; worn_on: string; outfit_id?: string | null };
+        Update: never;
+        Relationships: [];
+      };
     };
-    Views: Record<never, never>;
+    Views: {
+      item_wear_stats: {
+        Row: WearStatsRow;
+        Relationships: [];
+      };
+    };
     Functions: Record<never, never>;
     Enums: {
       age_bracket: AgeBracket;

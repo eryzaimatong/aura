@@ -14,7 +14,7 @@ import {
 } from '../../../lib/seasons';
 import { FormAlert } from '../../onboarding/FormAlert';
 import { SplashScreen } from '../../SplashScreen';
-import { useCurrentCard } from '../useCurrentCard';
+import { useCurrentCard, type UserSet } from '../useCurrentCard';
 import { ChoiceCard } from './ChoiceCard';
 
 type Topic = 'season' | 'face_shape' | 'undertone' | 'everything';
@@ -32,10 +32,10 @@ export function CorrectionScreen() {
   if (state.status === 'loading') return <SplashScreen />;
   if (state.status === 'none') return <Navigate to="/mirror/scan" replace />;
   if (state.status === 'error') return <Navigate to="/mirror/card" replace />;
-  return <CorrectionForm card={state.card} />;
+  return <CorrectionForm card={state.card} userSet={state.userSet} />;
 }
 
-function CorrectionForm({ card }: { card: AuraCardRow }) {
+function CorrectionForm({ card, userSet }: { card: AuraCardRow; userSet: UserSet }) {
   const navigate = useNavigate();
   const [topic, setTopic] = useState<Topic | null>(null);
   const [answers, setAnswers] = useState<CorrectionRequest>({});
@@ -77,12 +77,16 @@ function CorrectionForm({ card }: { card: AuraCardRow }) {
       <ScreenHeader title="Tell Mira what is off" backTo="/mirror/card" />
 
       <Card tone="lilac" flat>
-        <p className="text-micro font-bold uppercase tracking-wide text-gold-deep">I said</p>
+        {/* Once the user has changed something, these aren't Mira's words any more. */}
+        <p className="text-micro font-bold uppercase tracking-wide text-gold-deep">
+          {userSet.faceShape || userSet.colors ? 'Your card says' : 'I said'}
+        </p>
         <p className="mt-1 font-display text-h3 font-semibold">
           {card.season ? SEASON_NAMES[card.season] : 'No season yet'} · {FACE_SHAPE_NAMES[card.face_shape].toLowerCase()} face
         </p>
         <p className="mt-1 text-caption text-cocoa-soft">
-          Color confidence {pct(card.season_conf)} · shape {pct(card.shape_conf)}
+          {userSet.colors ? 'Colors set by you' : `Color confidence ${pct(card.season_conf)}`} ·{' '}
+          {userSet.faceShape ? 'shape set by you' : `shape ${pct(card.shape_conf)}`}
         </p>
       </Card>
 

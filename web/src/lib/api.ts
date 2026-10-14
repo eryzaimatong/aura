@@ -1,4 +1,4 @@
-import type { AuraCardRow, ColorSeason, FaceShape, Undertone } from './database.types';
+import type { AuraCardRow, ColorSeason, FaceShape, ItemCategory, Seasonality, Undertone } from './database.types';
 import type { ScanMeasurements } from './face/analyze';
 import { supabase } from './supabase';
 
@@ -17,7 +17,8 @@ export class ApiError extends Error {
 
 async function request<T>(path: string, init?: RequestInit & { auth?: boolean }): Promise<T> {
   const headers = new Headers(init?.headers);
-  headers.set('Content-Type', 'application/json');
+  // FormData sets its own multipart boundary.
+  if (!(init?.body instanceof FormData)) headers.set('Content-Type', 'application/json');
   if (init?.auth) {
     const { data } = await supabase.auth.getSession();
     if (!data.session) throw new ApiError(401, 'not_signed_in');
@@ -77,6 +78,32 @@ export interface CorrectionRequest {
 
 export function postCorrection(body: CorrectionRequest): Promise<AuraCard> {
   return request<AuraCard>('/api/cards/current/correction', { method: 'POST', auth: true, body: JSON.stringify(body) });
+}
+
+export interface TagResponse {
+  model_version: string;
+  cutout_webp_base64: string;
+  cutout_ok: boolean;
+  category: ItemCategory;
+  category_conf: number;
+  alternatives: { category: ItemCategory; confidence: number }[];
+  subcategory: string;
+  subcategory_label: string;
+  colors: { hex: string; pct: number; name: string }[];
+  color_name: string | null;
+  lab_primary: [number, number, number] | null;
+  in_palette: boolean | null;
+  palette_reason: string | null;
+  seasonality: Seasonality;
+  suggested_name: string;
+  embedding: number[];
+}
+
+/** Garment photo → cut-out + suggestions. Nothing is saved by this call. */
+export function tagItem(photo: Blob): Promise<TagResponse> {
+  const form = new FormData();
+  form.append('image', photo, 'item.jpg');
+  return request<TagResponse>('/api/items/tag', { method: 'POST', auth: true, body: form });
 }
 
 export function postUndertoneQuiz(answers: UndertoneAnswers): Promise<AuraCard> {

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Camera, IdCard } from 'lucide-react';
+import { Camera, IdCard, Shirt } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
@@ -24,6 +24,9 @@ export function HomeScreen() {
           </Button>
           <Button variant="outline" fullWidth icon={<IdCard size={18} />} onClick={() => navigate('/mirror/card')}>
             My Aura Card
+          </Button>
+          <Button variant="outline" fullWidth icon={<Shirt size={18} />} onClick={() => navigate('/closet')}>
+            My closet
           </Button>
           <Button
             variant="ghost"

@@ -18,3 +18,7 @@ npm-debug.log*
 
 # Datasets and training outputs (large, third-party licensed — never committed)
 data/
+
+# Downloaded at build time by `python -m app.ml.download_models` (too big to commit)
+api/app/ml/models/clip_vision_int8.onnx
+*.part

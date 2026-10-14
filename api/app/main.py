@@ -1,3 +1,4 @@
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -6,13 +7,21 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import APP_VERSION, settings
 from app.ml import face_shape
-from app.routers import cards, health, scan
+from app.ml.garments import TaggerUnavailable, get_tagger
+from app.routers import cards, health, items, scan
+
+log = logging.getLogger("aura")
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    # Load the face-shape model at boot (~2 s) so the first scan isn't the slow one.
+    # Load models at boot so the first scan / first garment isn't the slow one.
     face_shape.model_version()
+    try:
+        get_tagger()
+    except TaggerUnavailable as e:
+        # The API still runs; /api/items/tag answers 503 and the app falls back to manual tags.
+        log.warning("garment tagging disabled: %s", e)
     yield
 
 
@@ -29,3 +38,4 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(scan.router)
 app.include_router(cards.router)
+app.include_router(items.router)

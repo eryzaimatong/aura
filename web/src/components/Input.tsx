@@ -7,17 +7,19 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
   hint?: string;
   /** Puts the field in its error state and announces the message. */
   error?: string;
+  /** Keep the label for screen readers but don't show it (e.g. search fields). */
+  hideLabel?: boolean;
 }
 
 /** Text field with three states: default, focus (gold ring) and error. */
-export function Input({ label, hint, error, className, disabled, ...rest }: InputProps) {
+export function Input({ label, hint, error, hideLabel = false, className, disabled, ...rest }: InputProps) {
   const id = useId();
   const noteId = `${id}-note`;
   const note = error ?? hint;
 
   return (
     <div className={cx('flex flex-col gap-2', className)}>
-      <label htmlFor={id} className="text-label text-cocoa-soft">
+      <label htmlFor={id} className={cx('text-label text-cocoa-soft', hideLabel && 'sr-only')}>
         {label}
       </label>
       <input

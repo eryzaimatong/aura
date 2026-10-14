@@ -5,6 +5,11 @@ import { AuthProvider } from './lib/auth/AuthProvider';
 import { DevCheckScreen } from './screens/DevCheckScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { PrivacyNoticeScreen } from './screens/PrivacyNoticeScreen';
+import { RoomPlaceholderScreen } from './screens/RoomPlaceholderScreen';
+import { AddItemScreen } from './screens/closet/AddItemScreen';
+import { ClosetScreen } from './screens/closet/ClosetScreen';
+import { ItemDetailScreen } from './screens/closet/ItemDetailScreen';
+import { QuickStartScreen } from './screens/closet/QuickStartScreen';
 import { ComponentsScreen } from './screens/components/ComponentsScreen';
 import { AuraCardScreen } from './screens/mirror/card/AuraCardScreen';
 import { ConsentScreen } from './screens/mirror/ConsentScreen';
@@ -56,6 +61,11 @@ export default function App() {
             <Route path="/mirror/quiz" element={<UndertoneQuizScreen />} />
             <Route path="/mirror/card" element={<AuraCardScreen />} />
             <Route path="/mirror/correct" element={<CorrectionScreen />} />
+            <Route path="/closet" element={<ClosetScreen />} />
+            <Route path="/closet/add" element={<AddItemScreen />} />
+            <Route path="/closet/start" element={<QuickStartScreen />} />
+            <Route path="/closet/item/:id" element={<ItemDetailScreen />} />
+            <Route path="/rooms/:room" element={<RoomPlaceholderScreen />} />
           </Route>
 
           {/* Readable signed in or out. */}
