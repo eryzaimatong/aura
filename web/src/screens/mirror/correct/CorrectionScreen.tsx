@@ -7,7 +7,9 @@ import { Mira } from '../../../components/Mira';
 import { Screen } from '../../../components/Screen';
 import { ScreenHeader } from '../../../components/ScreenHeader';
 import { postCorrection, type CorrectionRequest } from '../../../lib/api';
+import { track } from '../../../lib/analytics';
 import { apiErrorMessage } from '../../../lib/apiErrors';
+import { useProfile } from '../../../lib/auth/context';
 import type { AuraCardRow } from '../../../lib/database.types';
 import {
   ALL_FACE_SHAPES, ALL_SEASONS, ALL_UNDERTONES, FACE_SHAPE_NAMES, NEIGHBOUR_SEASONS, pct, SEASON_NAMES, UNDERTONE_NAMES,
@@ -37,6 +39,7 @@ export function CorrectionScreen() {
 
 function CorrectionForm({ card, userSet }: { card: AuraCardRow; userSet: UserSet }) {
   const navigate = useNavigate();
+  const profile = useProfile();
   const [topic, setTopic] = useState<Topic | null>(null);
   const [answers, setAnswers] = useState<CorrectionRequest>({});
   const [saving, setSaving] = useState(false);
@@ -54,6 +57,7 @@ function CorrectionForm({ card, userSet }: { card: AuraCardRow; userSet: UserSet
     setError(null);
     try {
       await postCorrection(Object.fromEntries(needed.map((k) => [k, answers[k]])) as CorrectionRequest);
+      track(profile, 'card_corrected', { targets: needed.join(',') });
       navigate('/mirror/card', { replace: true });
     } catch (err) {
       setError(apiErrorMessage(err));

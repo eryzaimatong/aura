@@ -10,6 +10,9 @@ import { AddItemScreen } from './screens/closet/AddItemScreen';
 import { ClosetScreen } from './screens/closet/ClosetScreen';
 import { ItemDetailScreen } from './screens/closet/ItemDetailScreen';
 import { QuickStartScreen } from './screens/closet/QuickStartScreen';
+import { DiaryScreen } from './screens/diary/DiaryScreen';
+import { LookbookScreen } from './screens/looks/LookbookScreen';
+import { TodayScreen } from './screens/looks/TodayScreen';
 import { ComponentsScreen } from './screens/components/ComponentsScreen';
 import { AuraCardScreen } from './screens/mirror/card/AuraCardScreen';
 import { ConsentScreen } from './screens/mirror/ConsentScreen';
@@ -65,6 +68,9 @@ export default function App() {
             <Route path="/closet/add" element={<AddItemScreen />} />
             <Route path="/closet/start" element={<QuickStartScreen />} />
             <Route path="/closet/item/:id" element={<ItemDetailScreen />} />
+            <Route path="/today" element={<TodayScreen />} />
+            <Route path="/looks" element={<LookbookScreen />} />
+            <Route path="/diary" element={<DiaryScreen />} />
             <Route path="/rooms/:room" element={<RoomPlaceholderScreen />} />
           </Route>
 

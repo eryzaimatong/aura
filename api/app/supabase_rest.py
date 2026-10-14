@@ -42,5 +42,16 @@ class SupabaseRest:
         rows = await self._send("POST", table, params={}, json=row, prefer="return=representation")
         return rows[0]
 
+    async def insert_many(self, table: str, rows: list[Row], *, ignore_conflicts_on: str | None = None) -> list[Row]:
+        """Bulk insert. With `ignore_conflicts_on` (e.g. "user_id,item_id,worn_on"), duplicates are skipped."""
+        if not rows:
+            return []
+        prefer = "return=representation"
+        params: dict[str, str] = {}
+        if ignore_conflicts_on:
+            prefer += ",resolution=ignore-duplicates"
+            params["on_conflict"] = ignore_conflicts_on
+        return await self._send("POST", table, params=params, json=rows, prefer=prefer)
+
     async def update(self, table: str, filters: dict[str, str], values: Row) -> list[Row]:
         return await self._send("PATCH", table, params=filters, json=values, prefer="return=representation")

@@ -5,6 +5,7 @@ import { Card } from '../../components/Card';
 import { Screen } from '../../components/Screen';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { useProfile } from '../../lib/auth/context';
+import { track } from '../../lib/analytics';
 import { authErrorMessage } from '../../lib/authErrors';
 import { deleteItem, localToday, logWearToday } from '../../lib/closet/data';
 import { CATEGORY_LABEL, capitalize, shortDate } from '../../lib/closet/labels';
@@ -39,6 +40,7 @@ export function ItemDetailScreen() {
     setError(null);
     try {
       const added = await logWearToday(profile.id, item!.id);
+      if (added) track(profile, 'wear_logged', { category: item!.category });
       setNote(added ? 'Logged for today ✦' : 'Already logged for today.');
       reload();
     } catch (err) {

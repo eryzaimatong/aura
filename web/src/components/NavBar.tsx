@@ -14,7 +14,8 @@ const ROOMS: ReadonlyArray<{ room: Room; label: string; Icon: LucideIcon }> = [
 ];
 
 export interface NavBarProps {
-  active: Room;
+  /** null on screens outside the rooms (e.g. Home). */
+  active: Room | null;
   onSelect: (room: Room) => void;
   className?: string;
 }

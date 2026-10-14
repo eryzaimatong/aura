@@ -15,7 +15,7 @@ import onnxruntime as ort
 from tokenizers import Tokenizer
 
 from app.ml.model_files import CLIP_PROMPTS, CLIP_REVISION
-from app.ml.taxonomy import SEASONALITY_PROMPTS, SUBCATEGORIES, TEMPLATES
+from app.ml.taxonomy import OCCASION_PROMPTS, SEASONALITY_PROMPTS, SUBCATEGORIES, TEMPLATES
 
 CACHE = Path(__file__).resolve().parents[2] / "data" / "clip-text"  # gitignored
 BASE = f"https://huggingface.co/Xenova/clip-vit-base-patch32/resolve/{CLIP_REVISION}"
@@ -54,11 +54,14 @@ def main() -> None:
     sub = np.stack([mean_of([t.format(p) for p in SUBCATEGORIES[k][2] for t in TEMPLATES]) for k in keys])
     season_keys = list(SEASONALITY_PROMPTS)
     season = np.stack([mean_of(list(SEASONALITY_PROMPTS[k])) for k in season_keys])
+    occasion_keys = list(OCCASION_PROMPTS)
+    occasion = np.stack([mean_of(list(OCCASION_PROMPTS[k])) for k in occasion_keys])
 
     np.savez_compressed(CLIP_PROMPTS, keys=np.array(keys), embeddings=sub.astype(np.float32),
                         season_keys=np.array(season_keys), season_embeddings=season.astype(np.float32),
+                        occasion_keys=np.array(occasion_keys), occasion_embeddings=occasion.astype(np.float32),
                         revision=np.array(CLIP_REVISION))
-    print(f"wrote {CLIP_PROMPTS} ({len(keys)} subcategories, {len(season_keys)} seasonality prompts)")
+    print(f"wrote {CLIP_PROMPTS} ({len(keys)} subcategories, {len(season_keys)} seasonality, {len(occasion_keys)} occasions)")
 
 
 if __name__ == "__main__":

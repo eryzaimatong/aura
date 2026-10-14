@@ -6,6 +6,7 @@ import { Card } from '../../components/Card';
 import { Screen } from '../../components/Screen';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { useProfile } from '../../lib/auth/context';
+import { track } from '../../lib/analytics';
 import { countItems, saveItem } from '../../lib/closet/data';
 import { PhotoError, processGarmentPhoto } from '../../lib/closet/process';
 import { PhotoDrop } from './PhotoDrop';
@@ -42,6 +43,7 @@ export function QuickStartScreen() {
         const photo = await processGarmentPhoto(next.file);
         if (!photo.tags) throw new PhotoError('Mira can’t tag right now — add this one from “Add item”.');
         await saveItem(profile.id, photo.image, toNewItem(photo.tags, photo.tags.suggested_name, photo.tags.category));
+        track(profile, 'item_added', { category: photo.tags.category, auto_tagged: true, source: 'batch' });
         const preview = URL.createObjectURL(photo.image);
         previews.current.push(preview);
         update(next.key, { status: 'saved', preview, name: photo.tags.suggested_name });

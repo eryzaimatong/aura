@@ -39,6 +39,16 @@ SUBCATEGORIES: dict[str, tuple[ItemCategory, str, tuple[str, ...]]] = {
 
 TEMPLATES = ("a photo of a {}.", "a product photo of a {}, on a plain background.")
 
+# Matches the `occasion` enum. Used to judge how well each piece suits an occasion.
+OCCASION_PROMPTS: dict[str, tuple[str, ...]] = {
+    "casual": ("a casual everyday outfit", "relaxed weekend clothes"),
+    "class": ("a comfortable outfit for a university class", "a casual student outfit"),
+    "work": ("a smart office work outfit", "business casual clothing"),
+    "date": ("a stylish date night outfit", "a cute outfit for a dinner date"),
+    "formal": ("a formal event outfit", "elegant evening wear"),
+    "travel": ("a comfortable travel outfit", "practical clothes for a trip"),
+}
+
 # closet_items.seasonality: what weather the piece is for.
 SEASONALITY_PROMPTS: dict[str, tuple[str, ...]] = {
     "warm": ("a light, breathable piece of clothing for hot weather", "a thin summer garment"),

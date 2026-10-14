@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import APP_VERSION, settings
 from app.ml import face_shape
 from app.ml.garments import TaggerUnavailable, get_tagger
-from app.routers import cards, health, items, scan
+from app.routers import cards, health, items, outfits, scan
 
 log = logging.getLogger("aura")
 
@@ -39,3 +39,4 @@ app.include_router(health.router)
 app.include_router(scan.router)
 app.include_router(cards.router)
 app.include_router(items.router)
+app.include_router(outfits.router)

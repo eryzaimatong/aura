@@ -228,6 +228,13 @@ export type Database = {
         Update: Partial<Omit<ClosetItemInsert, 'user_id'>> & { archived?: boolean };
         Relationships: [];
       };
+      // Write-only for clients (RLS: insert own rows, never read).
+      events: {
+        Row: { id: number; user_id: string | null; name: string; props: Record<string, unknown>; session_id: string | null; created_at: string };
+        Insert: { user_id: string; name: string; props?: Record<string, unknown>; session_id?: string | null };
+        Update: never;
+        Relationships: [];
+      };
       wear_log: {
         Row: WearLogRow;
         Insert: { user_id: string; item_id: string; worn_on: string; outfit_id?: string | null };

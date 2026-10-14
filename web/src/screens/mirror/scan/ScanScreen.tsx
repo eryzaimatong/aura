@@ -1,7 +1,9 @@
 import { useRef, useState, type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router';
 import { ApiError, postScan } from '../../../lib/api';
+import { track } from '../../../lib/analytics';
 import { apiErrorMessage } from '../../../lib/apiErrors';
+import { useProfile } from '../../../lib/auth/context';
 import { analyzeCanvas, wipeCanvas, type AnalysisFailure, type ScanMeasurements } from '../../../lib/face/analyze';
 import { fileToCanvas } from '../../../lib/face/capture';
 import type { LightingIssue } from '../../../lib/face/color';
@@ -25,6 +27,7 @@ const pause = (ms: number) => new Promise((r) => window.setTimeout(r, ms));
 /** Capture → on-device analysis → POST numbers → Aura Card. The photo never leaves this component. */
 export function ScanScreen() {
   const navigate = useNavigate();
+  const profile = useProfile();
   const [phase, setPhase] = useState<Phase>({ kind: 'capture' });
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -50,6 +53,7 @@ export function ScanScreen() {
     setPhase({ kind: 'analyzing', step: 3 });
     try {
       const res = await postScan(measurements);
+      track(profile, 'scan_completed', { needs_quiz: res.needs_quiz });
       if (res.needs_quiz) {
         setPhase({ kind: 'low_light', colorConf: res.color_conf, shapeConf: res.card.shape_conf, issue });
       } else {

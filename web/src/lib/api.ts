@@ -106,6 +106,57 @@ export function tagItem(photo: Blob): Promise<TagResponse> {
   return request<TagResponse>('/api/items/tag', { method: 'POST', auth: true, body: form });
 }
 
+export type Occasion = 'casual' | 'class' | 'work' | 'date' | 'formal' | 'travel';
+
+export interface WeatherNow {
+  place: string | null;
+  temp_c: number;
+  feels_c: number;
+  humidity: number;
+  rain_pct: number;
+  rain_from_hour: number | null;
+  summary: string;
+}
+
+export function getWeather(coords: { lat: number; lon: number } | null): Promise<WeatherNow> {
+  const q = coords ? `?lat=${coords.lat}&lon=${coords.lon}` : '';
+  return request<WeatherNow>(`/api/weather${q}`, { auth: true });
+}
+
+export interface GeneratedOutfit {
+  pieces: { id: string; slot: ItemCategory }[];
+  /** Hard rule 7: always present — the UI never shows an outfit without it. */
+  reason: string;
+  tags: string[];
+  note: string | null;
+  occasion: Occasion | null;
+  generator_v: string;
+}
+
+export interface OutfitRequest {
+  occasion: Occasion | null;
+  weather: Pick<WeatherNow, 'temp_c' | 'feels_c' | 'rain_pct'> | null;
+  seed: number;
+  avoid_ids: string[];
+}
+
+export function generateOutfit(body: OutfitRequest): Promise<GeneratedOutfit> {
+  return request<GeneratedOutfit>('/api/outfits/generate', { method: 'POST', auth: true, body: JSON.stringify(body) });
+}
+
+export interface WearRequest {
+  item_ids: string[];
+  occasion: Occasion | null;
+  weather: OutfitRequest['weather'];
+  reason: string;
+  generator_v: string;
+  worn_on: string;
+}
+
+export function wearOutfit(body: WearRequest): Promise<{ outfit_id: string; newly_logged: number }> {
+  return request('/api/outfits/wear', { method: 'POST', auth: true, body: JSON.stringify(body) });
+}
+
 export function postUndertoneQuiz(answers: UndertoneAnswers): Promise<AuraCard> {
   return request<AuraCard>('/api/cards/current/undertone', { method: 'POST', auth: true, body: JSON.stringify(answers) });
 }

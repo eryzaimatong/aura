@@ -7,6 +7,7 @@ import { Mira } from '../../components/Mira';
 import { Screen } from '../../components/Screen';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { useProfile } from '../../lib/auth/context';
+import { track } from '../../lib/analytics';
 import { authErrorMessage } from '../../lib/authErrors';
 import { saveItem } from '../../lib/closet/data';
 import { CATEGORIES, CATEGORY_LABEL, capitalize } from '../../lib/closet/labels';
@@ -51,6 +52,7 @@ export function AddItemScreen() {
     setError(null);
     try {
       const item = await saveItem(profile.id, photo.image, toNewItem(photo.tags, name.trim(), category));
+      track(profile, 'item_added', { category, auto_tagged: photo.tags !== null, source: 'single' });
       navigate(`/closet/item/${item.id}`, { replace: true });
     } catch (err) {
       setError(authErrorMessage(err));

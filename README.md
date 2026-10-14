@@ -6,7 +6,7 @@ a diary of what you actually wear. Your guide is **Mira**, a mirror ghost.
 
 Built for Filipino users, launching on Google Play.
 
-> **Status:** in development. Steps 1–10 of 13 are done (see [Roadmap](#roadmap)). The face-shape
+> **Status:** in development. Steps 1–12 of 13 are done (see [Roadmap](#roadmap)). The face-shape
 > model is **not cleared for launch** yet: it fails the per-skin-tone fairness gate.
 
 ---
@@ -48,7 +48,7 @@ The full rule set is in [`AURA-BRIEF.md`](AURA-BRIEF.md#3-hard-rules).
 .
 ├── api/                    FastAPI backend
 │   ├── app/
-│   │   ├── routers/        HTTP endpoints (health, scan, cards, items)
+│   │   ├── routers/        HTTP endpoints (health, scan, cards, items, outfits)
 │   │   ├── schemas/        Pydantic request/response models
 │   │   ├── ml/             Face-shape model, colour rules, palettes, reports
 │   │   ├── auth.py         Supabase JWT verification (JWKS)
@@ -200,6 +200,21 @@ is stored until the user saves the item.
 There's no PyTorch: everything runs on `onnxruntime`. Tagging takes about 2 s per photo on a
 4-core laptop.
 
+## Outfits, weather and analytics
+
+- **Outfits** (`POST /api/outfits/generate`): each piece is scored on occasion fit (CLIP against
+  occasion prompts), weather (heat, rain), palette and freshness. Combinations then score on
+  colour harmony (CIELAB hue and chroma) and style coherence (CLIP similarity). A seeded jitter
+  powers Shuffle. Every outfit carries a reason built from what actually drove the pick.
+- **Wearing** (`POST /api/outfits/wear`) records `outfits` and `outfit_items` and logs one
+  `wear_log` row per piece (duplicates for the same day are skipped).
+- **Weather** (`GET /api/weather`) comes from [Open-Meteo](https://open-meteo.com/) (free, no
+  key), cached for 30 minutes. It defaults to Metro Manila. The user can opt in to their own
+  location, rounded to about 11 km and kept only on the device.
+- **Analytics:** the app writes `events` rows (`scan_completed`, `item_added`, `wear_logged`,
+  `outfit_generated`, `outfit_worn`, `card_corrected`) **only** when `profiles.share_analytics`
+  is true. Props never hold personal data.
+
 ## Mira artwork
 
 Mira is supplied art, not generated. Put one PNG per expression in `web/public/mira/`:
@@ -245,8 +260,8 @@ AURA tokens work. Utility names are short aliases: `rounded-md` is **20px**, and
 | 8 | Correction loop ("this doesn't look like me") | ✅ |
 | 9 | Closet: quick start, grid, item detail, wear log | ✅ |
 | 10 | Garment tagging: background removal, CLIP, colours | ✅ |
-| 11 | Outfits + Today (weather-aware) | ⏳ |
-| 12 | Diary: streaks, utilisation, insights | ⏳ |
+| 11 | Outfits + Today (weather-aware) | ✅ |
+| 12 | Diary: streaks, utilisation, insights | ✅ |
 | 13 | Capacitor Android build | ⏳ |
 
 ### Known limitations
