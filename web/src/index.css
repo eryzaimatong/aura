@@ -1,0 +1,107 @@
+@import 'tailwindcss';
+
+/* Fonts are bundled from npm — no runtime CDN, so the Capacitor build works offline. */
+@import '@fontsource-variable/fredoka';
+@import '@fontsource-variable/nunito';
+@import '@fontsource-variable/caveat';
+
+/*
+  AURA design tokens (AURA-BRIEF §4).
+  Tailwind's default palette, fonts, sizes, radii and shadows are cleared,
+  so only these tokens exist as utilities — a stray `bg-red-500` won't compile.
+
+  Brief name        → utility suffix
+  surface/*         → cream, paper, sand, track
+  text/*            → cocoa, cocoa-soft, muted
+  brand/*           → gold, gold-deep, butter
+  accent/*          → lilac, blush, coral, sage
+  status/*          → danger, success
+  opal/*, tint/*    → opal-*, tint-*
+*/
+@theme {
+  --color-*: initial;
+  --color-cream: #fdf6ec;
+  --color-paper: #ffffff;
+  --color-sand: #fbefe0;
+  --color-track: #f0e3cf;
+
+  --color-cocoa: #5b3a2e;
+  --color-cocoa-soft: #7a5947;
+  --color-muted: #7d6353;
+
+  --color-gold: #e9b869;
+  --color-gold-deep: #c08a4a;
+  --color-butter: #ffe2a8;
+
+  --color-lilac: #b9a6f2;
+  --color-blush: #ffa8be;
+  --color-coral: #f08c7a;
+  --color-sage: #a8c686;
+
+  --color-danger: #c0564a;
+  --color-success: #5e7a4e;
+
+  --color-opal-pink: #ffeaf5;
+  --color-opal-lilac: #e7e6ff;
+  --color-opal-blue: #ddf2ff;
+
+  --color-tint-lilac: #f3ecff;
+  --color-tint-sage: #eff4ec;
+  --color-tint-peach: #fff0e2;
+  --color-tint-blue: #edeff8;
+  --color-tint-pink: #f7eef9;
+
+  --font-*: initial;
+  --font-display: 'Fredoka Variable', sans-serif;
+  --font-body: 'Nunito Variable', sans-serif;
+  --font-mira: 'Caveat Variable', cursive;
+
+  --text-*: initial;
+  --text-display: 44px;
+  --text-display--line-height: 1.1;
+  --text-h1: 30px;
+  --text-h1--line-height: 1.2;
+  --text-h2: 26px;
+  --text-h2--line-height: 1.25;
+  --text-h3: 22px;
+  --text-h3--line-height: 1.3;
+  --text-stat: 20px;
+  --text-stat--line-height: 1.2;
+  --text-body: 14px;
+  --text-body--line-height: 1.5;
+  --text-label: 13px;
+  --text-label--line-height: 1.4;
+  --text-caption: 12px;
+  --text-caption--line-height: 1.4;
+  --text-micro: 11px;
+  --text-micro--line-height: 1.3;
+
+  --radius-*: initial;
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
+  --radius-pill: 999px;
+
+  /* 8pt base: Tailwind's 4px step stays, so p-2 = 8, p-4 = 16, p-6 = 24 */
+  --spacing-gutter: 24px;
+
+  --shadow-*: initial;
+  --shadow-soft: 0 4px 14px rgba(107, 66, 41, 0.1);
+  --shadow-card: 0 8px 24px rgba(107, 66, 41, 0.12);
+}
+
+@layer base {
+  html,
+  body {
+    @apply bg-cream font-body text-body text-cocoa antialiased;
+  }
+
+  /* Browser autofill paints its own blue background and black text; keep the tokens. */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--color-cocoa);
+    box-shadow: 0 0 0 1000px var(--color-paper) inset;
+    caret-color: var(--color-cocoa);
+  }
+}

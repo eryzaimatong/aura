@@ -1,0 +1,70 @@
+import { lazy, Suspense } from 'react';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router';
+import { PublicOnly, RequireAuth } from './components/RouteGuards';
+import { AuthProvider } from './lib/auth/AuthProvider';
+import { DevCheckScreen } from './screens/DevCheckScreen';
+import { HomeScreen } from './screens/HomeScreen';
+import { PrivacyNoticeScreen } from './screens/PrivacyNoticeScreen';
+import { ComponentsScreen } from './screens/components/ComponentsScreen';
+import { AuraCardScreen } from './screens/mirror/card/AuraCardScreen';
+import { ConsentScreen } from './screens/mirror/ConsentScreen';
+import { RequireScanConsent } from './screens/mirror/RequireScanConsent';
+import { SplashScreen } from './screens/SplashScreen';
+
+// MediaPipe is ~400 KB of JS: load it only when someone actually scans.
+const ScanScreen = lazy(() => import('./screens/mirror/scan/ScanScreen').then((m) => ({ default: m.ScanScreen })));
+import { UndertoneQuizScreen } from './screens/mirror/UndertoneQuizScreen';
+import { AgeBlockedScreen } from './screens/onboarding/AgeBlockedScreen';
+import { AgeCheckScreen } from './screens/onboarding/AgeCheckScreen';
+import { CheckEmailScreen } from './screens/onboarding/CheckEmailScreen';
+import { GuardianScreen } from './screens/onboarding/GuardianScreen';
+import { LoginScreen } from './screens/onboarding/LoginScreen';
+import { SignUpScreen } from './screens/onboarding/SignUpScreen';
+import { WelcomeScreen } from './screens/onboarding/WelcomeScreen';
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route element={<PublicOnly />}>
+            <Route path="/welcome" element={<WelcomeScreen />} />
+            <Route path="/age" element={<AgeCheckScreen />} />
+            <Route path="/age/guardian" element={<GuardianScreen />} />
+            <Route path="/age/blocked" element={<AgeBlockedScreen />} />
+            <Route path="/signup" element={<SignUpScreen />} />
+            <Route path="/check-email" element={<CheckEmailScreen />} />
+            <Route path="/login" element={<LoginScreen />} />
+          </Route>
+
+          <Route element={<RequireAuth />}>
+            <Route path="/" element={<HomeScreen />} />
+            <Route path="/mirror" element={<Navigate to="/mirror/scan" replace />} />
+            <Route path="/mirror/consent" element={<ConsentScreen />} />
+            {/* No camera before consent (hard rule 3). */}
+            <Route element={<RequireScanConsent />}>
+              <Route
+                path="/mirror/scan"
+                element={
+                  <Suspense fallback={<SplashScreen />}>
+                    <ScanScreen />
+                  </Suspense>
+                }
+              />
+            </Route>
+            <Route path="/mirror/quiz" element={<UndertoneQuizScreen />} />
+            <Route path="/mirror/card" element={<AuraCardScreen />} />
+          </Route>
+
+          {/* Readable signed in or out. */}
+          <Route path="/privacy" element={<PrivacyNoticeScreen />} />
+
+          {/* Dev-only pages never ship in the Play build. */}
+          {import.meta.env.DEV && <Route path="/dev" element={<DevCheckScreen />} />}
+          {import.meta.env.DEV && <Route path="/components" element={<ComponentsScreen />} />}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}
