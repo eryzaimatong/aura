@@ -1,0 +1,15 @@
+# Normalise line endings to LF in the repo (stops Windows CRLF churn in diffs)
+* text=auto eol=lf
+
+# Windows-only scripts keep CRLF
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary assets: never diffed or line-converted
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.task binary
+*.wasm binary
+*.woff2 binary

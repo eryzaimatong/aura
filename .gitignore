@@ -1,0 +1,17 @@
+# OS clutter
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.idea/
+*.swp
+
+# Secrets anywhere in the tree (web and api have their own ignores too)
+.env
+.env.local
+*.local
+
+# Logs
+*.log
+npm-debug.log*
