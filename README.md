@@ -6,7 +6,7 @@ a diary of what you actually wear. Your guide is **Mira**, a mirror ghost.
 
 Built for Filipino users, launching on Google Play.
 
-> **Status:** in development. Steps 1–12 of 13 are done (see [Roadmap](#roadmap)). The face-shape
+> **Status:** in development. All 13 build steps are done (see [Roadmap](#roadmap)). The face-shape
 > model is **not cleared for launch** yet: it fails the per-skin-tone fairness gate.
 
 ---
@@ -244,7 +244,35 @@ AURA tokens work. Utility names are short aliases: `rounded-md` is **20px**, and
 | Python version | from `api/.python-version` (3.11) |
 | Environment | `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `CORS_ORIGINS` |
 
-**Android app:** Capacitor packaging is step 13 and isn't set up yet.
+## Android app (Capacitor)
+
+The Android project lives in `web/android` (app id `com.eryza.aura`). Everything runs locally
+inside the app, including MediaPipe, the fonts and the face model: no CDN at runtime.
+
+**Requirements:** Android Studio, with the Android SDK, and **JDK 21**. Capacitor 8's Gradle
+can't run on Java 25. Put a JDK 21 in `~/.jdks/` (e.g. Eclipse Temurin 21), then create
+`web/android/.gradle/config.properties` (gitignored) with
+`java.home=C\:\\Users\\<you>\\.jdks\\jdk-21…`. Android Studio and `npm run android:apk` both use it.
+Also create `web/android/local.properties` with `sdk.dir=…` pointing at your Android SDK.
+
+| Command (from `web/`) | What it does |
+|---|---|
+| `npm run android:dev` | Builds the web app against your **local API** (`http://10.0.2.2:8000`, the emulator's address for your computer) and syncs it into the Android project. HTTP is allowed in this build only. |
+| `npm run android:sync` | Production web build (uses `VITE_API_URL` from `.env.local`) and sync. |
+| `npm run android:open` | Opens the project in Android Studio. Press ▶ Run to install on the emulator or a phone. |
+| `npm run android:apk` | Builds a debug APK from the command line → `web/android/app/build/outputs/apk/debug/app-debug.apk`. |
+| `npm run android:icons` | Regenerates launcher icons and splash screens from `web/resources/`. |
+
+**Native details:**
+- **Camera:** the selfie uses the web view's `getUserMedia` (frames stay in memory). There's no
+  native camera plugin, because that would save photo files.
+- **Edge-to-edge:** Capacitor injects `--safe-area-inset-*`, and screens pad with
+  `--safe-top`/`--safe-bottom`. The status bar uses dark icons over the cream background.
+- **Sign-up email links** open the app via `com.eryza.aura://auth/callback`. Add
+  `com.eryza.aura://**` to Supabase **Authentication → URL Configuration → Redirect URLs**.
+- **Cloud backup is off**, so the session isn't copied into device backups.
+- **Testing on a real phone** needs the API reachable over HTTPS (deploy it to Render and set
+  `VITE_API_URL`), since `10.0.2.2` only exists inside the emulator.
 
 ## Roadmap
 
@@ -262,7 +290,7 @@ AURA tokens work. Utility names are short aliases: `rounded-md` is **20px**, and
 | 10 | Garment tagging: background removal, CLIP, colours | ✅ |
 | 11 | Outfits + Today (weather-aware) | ✅ |
 | 12 | Diary: streaks, utilisation, insights | ✅ |
-| 13 | Capacitor Android build | ⏳ |
+| 13 | Capacitor Android build | ✅ |
 
 ### Known limitations
 

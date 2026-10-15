@@ -90,6 +90,15 @@
   --shadow-card: 0 8px 24px rgba(107, 66, 41, 0.12);
 }
 
+/*
+  Safe areas. In the Android app (edge-to-edge), Capacitor injects --safe-area-inset-*;
+  in browsers the standard env() values apply (0 on desktop).
+*/
+:root {
+  --safe-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  --safe-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+}
+
 @layer base {
   html,
   body {

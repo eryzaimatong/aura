@@ -1,5 +1,6 @@
 import type { AuraCardRow, ColorSeason, FaceShape, ItemCategory, Seasonality, Undertone } from './database.types';
 import type { ScanMeasurements } from './face/analyze';
+import { deviceHint } from './native';
 import { supabase } from './supabase';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -57,7 +58,7 @@ export function postScan(measurements: ScanMeasurements): Promise<ScanResponse> 
   return request<ScanResponse>('/api/scan', {
     method: 'POST',
     auth: true,
-    body: JSON.stringify({ ...measurements, device_hint: 'browser' }),
+    body: JSON.stringify({ ...measurements, device_hint: deviceHint() }),
   });
 }
 

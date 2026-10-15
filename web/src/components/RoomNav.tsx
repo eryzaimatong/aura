@@ -13,7 +13,7 @@ const ROOM_PATHS: Record<Room, string> = {
 export function RoomNav({ active }: { active: Room | null }) {
   const navigate = useNavigate();
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-10 mx-auto w-full max-w-[390px] px-4 pb-[max(env(safe-area-inset-bottom),16px)]">
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-10 mx-auto w-full max-w-[390px] px-4 pb-[calc(var(--safe-bottom)+16px)]">
       <NavBar className="pointer-events-auto" active={active} onSelect={(room) => navigate(ROOM_PATHS[room])} />
     </div>
   );

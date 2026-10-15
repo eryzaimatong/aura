@@ -13,7 +13,8 @@ export interface ScreenProps {
 /** Mobile screen column: 390 max width, 24px gutters, actions pinned to the bottom. */
 export function Screen({ children, footer, centered = false, className }: ScreenProps) {
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-[390px] flex-col px-gutter pt-12 pb-8">
+    // Safe-area padding keeps content clear of the status bar and gesture bar in the Android app.
+    <main className="mx-auto flex min-h-dvh w-full max-w-[390px] flex-col px-gutter pt-[calc(var(--safe-top)+3rem)] pb-[calc(var(--safe-bottom)+2rem)]">
       <div className={cx('flex flex-1 flex-col', centered && 'items-center justify-center text-center', className)}>
         {children}
       </div>

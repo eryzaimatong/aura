@@ -43,7 +43,5 @@ export function isAgeBlocked(): boolean {
   }
 }
 
-/** Where auth emails send people back to. */
-export function authRedirectUrl(): string {
-  return `${window.location.origin}/`;
-}
+/** Where auth emails send people back to (the app's own link scheme on Android). */
+export { authRedirectUrl } from '../../lib/native';

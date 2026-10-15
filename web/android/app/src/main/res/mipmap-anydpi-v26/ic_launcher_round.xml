@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Foreground has no inset: web/resources/icon-foreground.png is already scaled to sit inside
+     the adaptive-icon safe zone (66% circle), so an extra inset would shrink Mira twice. -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background>
+        <inset android:drawable="@mipmap/ic_launcher_background" android:inset="16.7%" />
+    </background>
+    <foreground android:drawable="@mipmap/ic_launcher_foreground" />
+</adaptive-icon>
