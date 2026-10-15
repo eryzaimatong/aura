@@ -25,14 +25,19 @@ export interface MiraProps {
   className?: string;
 }
 
-/** Mira, the mirror ghost. Artwork lives at /public/mira/<expression>.png. */
+const url = (e: MiraExpression) => `${import.meta.env.BASE_URL}mira/${e}.png`;
+
+/**
+ * Mira, the mirror ghost. Artwork lives at /public/mira/<expression>.png.
+ * An expression that hasn't been drawn yet falls back to `hello`, then to a placeholder.
+ */
 export function Mira({ expression, size = 'md', label, className }: MiraProps) {
-  const src = `${import.meta.env.BASE_URL}mira/${expression}.png`;
-  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const [failed, setFailed] = useState<ReadonlySet<string>>(() => new Set());
+  const src = [url(expression), url('hello')].find((s) => !failed.has(s));
   const a11y = label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true };
 
-  if (failedSrc === src) {
-    // Artwork not dropped in yet — keep the layout stable instead of a broken image.
+  if (!src) {
+    // No artwork at all yet — keep the layout stable instead of a broken image.
     return (
       <div
         {...a11y}
@@ -50,7 +55,7 @@ export function Mira({ expression, size = 'md', label, className }: MiraProps) {
       alt={label ?? ''}
       aria-hidden={label ? undefined : true}
       draggable={false}
-      onError={() => setFailedSrc(src)}
+      onError={() => setFailed((f) => new Set(f).add(src))}
       className={cx('object-contain select-none', SIZES[size], className)}
     />
   );
