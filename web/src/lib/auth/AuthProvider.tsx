@@ -4,7 +4,7 @@ import { authErrorMessage } from '../authErrors';
 import type { ProfileRow } from '../database.types';
 import { ensureProfile } from '../profile';
 import { supabase } from '../supabase';
-import { AuthContext, type AuthContextValue, type AuthState } from './context';
+import { AuthContext, type AuthContextValue, type AuthState, type ProfilePatch } from './context';
 
 type ProfileResult = { userId: string; profile: ProfileRow } | { userId: string; error: string };
 
@@ -45,6 +45,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAttempt((n) => n + 1);
   }, []);
 
+  const updateProfile = useCallback(async (patch: ProfilePatch) => {
+    if (!result || 'error' in result) throw new Error('No profile loaded.');
+    const { data, error } = await supabase.from('profiles').update(patch).eq('id', result.userId).select('*').single();
+    if (error) throw error;
+    setResult({ userId: result.userId, profile: data });
+  }, [result]);
+
   const state = useMemo<AuthState>(() => {
     if (session === undefined) return { status: 'loading' };
     if (session === null) return { status: 'signed_out' };
@@ -53,6 +60,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { status: 'ready', session, profile: result.profile };
   }, [session, result]);
 
-  const value = useMemo<AuthContextValue>(() => ({ state, signOut, retry }), [state, signOut, retry]);
+  const value = useMemo<AuthContextValue>(() => ({ state, signOut, retry, updateProfile }), [state, signOut, retry, updateProfile]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

@@ -182,6 +182,12 @@ export type WearStatsRow = {
   created_at: string;
 };
 
+/** Read-only, untyped rows: only ever copied into a data export as-is. */
+type ExportOnlyTable = { Row: Record<string, unknown>; Insert: never; Update: never; Relationships: [] };
+
+export type DeleteScope = 'scans' | 'closet' | 'all';
+export type DataRequestKind = 'export' | 'delete_scans' | 'delete_closet' | 'delete_all';
+
 export type Database = {
   public: {
     Tables: {
@@ -241,6 +247,31 @@ export type Database = {
         Update: never;
         Relationships: [];
       };
+      outfits: {
+        Row: {
+          id: string; user_id: string; occasion: string | null; weather_ctx: Record<string, unknown> | null;
+          reason: string | null; generator_v: string; saved: boolean; created_at: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      // Tables the app doesn't use yet but must include in a data export.
+      undertone_quiz: ExportOnlyTable;
+      trips: ExportOnlyTable;
+      goals: ExportOnlyTable;
+      measurements: ExportOnlyTable;
+      style_prints: ExportOnlyTable;
+      recommendations: ExportOnlyTable;
+      rec_feedback: ExportOnlyTable;
+      outfit_items: ExportOnlyTable;
+      // Audit trail of export / deletion requests (hard rule 5).
+      data_requests: {
+        Row: { id: string; user_id: string; kind: DataRequestKind; status: string; file_path: string | null; requested_at: string; completed_at: string | null };
+        Insert: { user_id: string; kind: DataRequestKind; status?: string; completed_at?: string | null };
+        Update: never;
+        Relationships: [];
+      };
     };
     Views: {
       item_wear_stats: {
@@ -248,7 +279,13 @@ export type Database = {
         Relationships: [];
       };
     };
-    Functions: Record<never, never>;
+    Functions: {
+      // db/005: deletes the caller's own data, scoped.
+      delete_my_data: {
+        Args: { scope: DeleteScope };
+        Returns: Record<string, unknown>;
+      };
+    };
     Enums: {
       age_bracket: AgeBracket;
       plan_tier: PlanTier;

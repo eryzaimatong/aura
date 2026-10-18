@@ -14,6 +14,12 @@ export function authRedirectUrl(): string {
   return isNative ? NATIVE_AUTH_CALLBACK : `${window.location.origin}/`;
 }
 
+/** Password-reset emails land on the "choose a new password" screen. */
+export function passwordResetRedirectUrl(): string {
+  // Native: the callback link carries type=recovery and handleAuthLink routes to the screen.
+  return isNative ? NATIVE_AUTH_CALLBACK : `${window.location.origin}/reset-password`;
+}
+
 /** 'android' | 'ios' | 'browser' — recorded on scans as device_hint. */
 export function deviceHint(): 'android' | 'ios' | 'browser' {
   const p = Capacitor.getPlatform();
@@ -33,6 +39,10 @@ export async function handleAuthLink(url: string): Promise<void> {
   const refresh_token = hash.get('refresh_token');
   if (code) await supabase.auth.exchangeCodeForSession(code);
   else if (access_token && refresh_token) await supabase.auth.setSession({ access_token, refresh_token });
+  // A password-reset link: send them to choose a new password.
+  if (hash.get('type') === 'recovery' || parsed.searchParams.get('type') === 'recovery') {
+    window.location.assign('/reset-password');
+  }
 }
 
 /** Native-only setup. Safe to call in the browser (does nothing). */

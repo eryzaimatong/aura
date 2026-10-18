@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
 import { Screen } from '../../components/Screen';
@@ -71,6 +71,7 @@ export function LoginScreen() {
           onChange={(e) => setPassword(e.target.value)}
         />
       </form>
+      <Link to="/forgot" className="mt-3 self-end text-label font-bold text-gold-deep">Forgot password?</Link>
     </Screen>
   );
 }

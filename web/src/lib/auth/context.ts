@@ -8,11 +8,15 @@ export type AuthState =
   | { status: 'ready'; session: Session; profile: ProfileRow }
   | { status: 'error'; session: Session; message: string };
 
+export type ProfilePatch = Partial<Pick<ProfileRow, 'display_name' | 'units' | 'share_analytics'>>;
+
 export interface AuthContextValue {
   state: AuthState;
   signOut: () => Promise<void>;
   /** Re-runs profile loading after an error. */
   retry: () => void;
+  /** Saves profile fields and updates the in-memory profile (no reload). */
+  updateProfile: (patch: ProfilePatch) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null);

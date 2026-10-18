@@ -79,8 +79,8 @@ The full rule set is in [`AURA-BRIEF.md`](AURA-BRIEF.md#3-hard-rules).
 ### 1. Set up Supabase
 
 1. In the **SQL Editor**, run the files in `db/` **in order**:
-   `000_schema.sql` → `001_rls_hardening.sql` → `002_wear_log_ownership.sql` → `003_table_grants.sql`.
-   Migrations 001–003 are safe to re-run.
+   `000_schema.sql` → `001_rls_hardening.sql` → `002_wear_log_ownership.sql` → `003_table_grants.sql`
+   → `004_closet_storage.sql` → `005_delete_my_data.sql`. Migrations 001–005 are safe to re-run.
 2. Under **Authentication → URL Configuration**:
    - Set **Site URL** to `http://localhost:5173`.
    - Add `http://localhost:5173/**` to **Redirect URLs**.
@@ -291,6 +291,7 @@ Also create `web/android/local.properties` with `sdk.dir=…` pointing at your A
 | 11 | Outfits + Today (weather-aware) | ✅ |
 | 12 | Diary: streaks, utilisation, insights | ✅ |
 | 13 | Capacitor Android build | ✅ |
+| + | Profile, Settings, Data & privacy (export + scoped deletion), forgot password | ✅ |
 
 ### Known limitations
 
@@ -308,7 +309,6 @@ Also create `web/android/local.properties` with `sdk.dir=…` pointing at your A
   on-device.
 - Tagging works best on one item laid flat or hung up. In photos of a person wearing an outfit,
   skin and other pieces leak into the colours and category.
-- Forgot password isn't built yet.
 
 ## Conventions
 

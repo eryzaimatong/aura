@@ -5,6 +5,11 @@ import { AuthProvider } from './lib/auth/AuthProvider';
 import { DevCheckScreen } from './screens/DevCheckScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { PrivacyNoticeScreen } from './screens/PrivacyNoticeScreen';
+import { DataPrivacyScreen } from './screens/account/DataPrivacyScreen';
+import { ProfileScreen } from './screens/account/ProfileScreen';
+import { ResetPasswordScreen } from './screens/account/ResetPasswordScreen';
+import { SettingsScreen } from './screens/account/SettingsScreen';
+import { ForgotPasswordScreen } from './screens/onboarding/ForgotPasswordScreen';
 import { RoomPlaceholderScreen } from './screens/RoomPlaceholderScreen';
 import { AddItemScreen } from './screens/closet/AddItemScreen';
 import { ClosetScreen } from './screens/closet/ClosetScreen';
@@ -44,6 +49,7 @@ export default function App() {
             <Route path="/signup" element={<SignUpScreen />} />
             <Route path="/check-email" element={<CheckEmailScreen />} />
             <Route path="/login" element={<LoginScreen />} />
+            <Route path="/forgot" element={<ForgotPasswordScreen />} />
           </Route>
 
           <Route element={<RequireAuth />}>
@@ -72,10 +78,16 @@ export default function App() {
             <Route path="/looks" element={<LookbookScreen />} />
             <Route path="/diary" element={<DiaryScreen />} />
             <Route path="/rooms/:room" element={<RoomPlaceholderScreen />} />
+            <Route path="/profile" element={<ProfileScreen />} />
+            <Route path="/settings" element={<SettingsScreen />} />
+            <Route path="/privacy/data" element={<DataPrivacyScreen />} />
+            <Route path="/account/password" element={<ResetPasswordScreen />} />
           </Route>
 
           {/* Readable signed in or out. */}
           <Route path="/privacy" element={<PrivacyNoticeScreen />} />
+          {/* Reset-email landing: the link signs the user in, the screen handles expired links. */}
+          <Route path="/reset-password" element={<ResetPasswordScreen />} />
 
           {/* Dev-only pages never ship in the Play build. */}
           {import.meta.env.DEV && <Route path="/dev" element={<DevCheckScreen />} />}

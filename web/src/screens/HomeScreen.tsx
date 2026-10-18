@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { CalendarHeart, Layers, ScanFace, Shirt } from 'lucide-react';
 import { Link, useNavigate } from 'react-router';
@@ -7,7 +6,7 @@ import { Mira } from '../components/Mira';
 import { RoomNav } from '../components/RoomNav';
 import { Screen } from '../components/Screen';
 import { isMinor } from '../lib/ageBracket';
-import { useAuth, useProfile } from '../lib/auth/context';
+import { useProfile } from '../lib/auth/context';
 import { FACE_SHAPE_NAMES, SEASON_NAMES } from '../lib/seasons';
 import { useCloset } from './closet/useCloset';
 import { OutfitCollage } from './looks/OutfitCollage';
@@ -29,8 +28,6 @@ function greeting(hour: number): string {
 export function HomeScreen() {
   const profile = useProfile();
   const navigate = useNavigate();
-  const { signOut } = useAuth();
-  const [signingOut, setSigningOut] = useState(false);
   const { state: cardState } = useCurrentCard();
   const { state: closet } = useCloset();
   const weather = useWeather();
@@ -58,7 +55,10 @@ export function HomeScreen() {
             </p>
           )}
         </div>
-        <span className="flex size-12 shrink-0 items-center justify-center rounded-pill bg-tint-lilac"><Mira expression="hello" size="sm" /></span>
+        <Link to="/profile" aria-label="Your profile"
+          className="flex size-12 shrink-0 items-center justify-center rounded-pill bg-tint-lilac focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-deep">
+          <Mira expression="hello" size="sm" />
+        </Link>
       </header>
 
       <Link to={tip.to} className="mt-4 block">
@@ -106,10 +106,6 @@ export function HomeScreen() {
       </ul>
 
       {isMinor(profile.age_bracket) && <p className="mt-4 text-caption text-cocoa-soft">Sharing and the shop stay off on under-18 accounts.</p>}
-      <button type="button" disabled={signingOut} onClick={() => { setSigningOut(true); void signOut(); }}
-        className="mt-6 self-center text-label text-cocoa-soft underline">
-        Log out
-      </button>
       <RoomNav active={null} />
     </Screen>
   );
