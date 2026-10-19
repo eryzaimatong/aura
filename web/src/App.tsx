@@ -6,6 +6,7 @@ import { DevCheckScreen } from './screens/DevCheckScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { PrivacyNoticeScreen } from './screens/PrivacyNoticeScreen';
 import { DataPrivacyScreen } from './screens/account/DataPrivacyScreen';
+import { MeasurementsScreen } from './screens/account/MeasurementsScreen';
 import { ProfileScreen } from './screens/account/ProfileScreen';
 import { ResetPasswordScreen } from './screens/account/ResetPasswordScreen';
 import { SettingsScreen } from './screens/account/SettingsScreen';
@@ -81,6 +82,7 @@ export default function App() {
             <Route path="/vanity" element={<VanityScreen />} />
             <Route path="/rooms/:room" element={<RoomPlaceholderScreen />} />
             <Route path="/profile" element={<ProfileScreen />} />
+            <Route path="/profile/measurements" element={<MeasurementsScreen />} />
             <Route path="/settings" element={<SettingsScreen />} />
             <Route path="/privacy/data" element={<DataPrivacyScreen />} />
             <Route path="/account/password" element={<ResetPasswordScreen />} />

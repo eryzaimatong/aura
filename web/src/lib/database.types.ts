@@ -4,6 +4,7 @@
  * (Can be replaced later by `supabase gen types typescript`.)
  */
 import type { AgeBracket } from './ageBracket';
+import type { BodyShape, Measurements } from './bodyShape';
 
 export type PlanTier = 'free' | 'premium';
 export type ConsentKind = 'face_scan' | 'analytics' | 'marketing' | 'guardian';
@@ -278,7 +279,13 @@ export type Database = {
       undertone_quiz: ExportOnlyTable;
       trips: ExportOnlyTable;
       goals: ExportOnlyTable;
-      measurements: ExportOnlyTable;
+      // Hard rule 6: no weight field, by design.
+      measurements: {
+        Row: Measurements & { user_id: string; shape: BodyShape | null; updated_at: string };
+        Insert: Partial<Measurements> & { user_id: string; shape?: BodyShape | null };
+        Update: Partial<Measurements> & { shape?: BodyShape | null };
+        Relationships: [];
+      };
       style_prints: ExportOnlyTable;
       // Written by the API (POST /api/recommendations/refresh); read here.
       recommendations: {

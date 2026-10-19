@@ -6,6 +6,7 @@ import { Mira } from '../../components/Mira';
 import { Screen } from '../../components/Screen';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { useProfile } from '../../lib/auth/context';
+import { SHAPE_NAMES, type BodyShape } from '../../lib/bodyShape';
 import { streak } from '../../lib/diary';
 import { FACE_SHAPE_NAMES, SEASON_NAMES } from '../../lib/seasons';
 import { supabase } from '../../lib/supabase';
@@ -18,10 +19,13 @@ export function ProfileScreen() {
   const { state: cardState } = useCurrentCard();
   const { state: closet } = useCloset();
   const [looks, setLooks] = useState<number | null>(null);
+  const [shape, setShape] = useState<BodyShape | null>(null);
 
   useEffect(() => {
     supabase.from('outfits').select('id', { count: 'exact', head: true }).eq('user_id', profile.id)
       .then(({ count }) => setLooks(count ?? 0));
+    supabase.from('measurements').select('shape').eq('user_id', profile.id).maybeSingle()
+      .then(({ data }) => setShape(data?.shape ?? null));
   }, [profile.id]);
 
   const card = cardState.status === 'ready' ? cardState.card : null;
@@ -55,7 +59,7 @@ export function ProfileScreen() {
         <ListSection title="Your profile">
           <ListRow label="Aura Card" value={card?.season ? SEASON_NAMES[card.season] : card ? 'Colors to finish' : 'Scan'}
             onClick={() => navigate(card ? '/mirror/card' : '/mirror')} />
-          <ListRow label="Body measurements" soon />
+          <ListRow label="Body measurements" value={shape ? SHAPE_NAMES[shape] : 'Add'} onClick={() => navigate('/profile/measurements')} />
           <ListRow label="Style Print" soon />
           <ListRow label="Glow-up roadmap" soon />
         </ListSection>
