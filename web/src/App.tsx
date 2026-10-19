@@ -7,6 +7,8 @@ import { HomeScreen } from './screens/HomeScreen';
 import { PrivacyNoticeScreen } from './screens/PrivacyNoticeScreen';
 import { DataPrivacyScreen } from './screens/account/DataPrivacyScreen';
 import { MeasurementsScreen } from './screens/account/MeasurementsScreen';
+import { StylePrintScreen } from './screens/style/StylePrintScreen';
+import { StyleQuizScreen } from './screens/style/StyleQuizScreen';
 import { ProfileScreen } from './screens/account/ProfileScreen';
 import { ResetPasswordScreen } from './screens/account/ResetPasswordScreen';
 import { SettingsScreen } from './screens/account/SettingsScreen';
@@ -83,6 +85,8 @@ export default function App() {
             <Route path="/rooms/:room" element={<RoomPlaceholderScreen />} />
             <Route path="/profile" element={<ProfileScreen />} />
             <Route path="/profile/measurements" element={<MeasurementsScreen />} />
+            <Route path="/profile/style" element={<StylePrintScreen />} />
+            <Route path="/profile/style/quiz" element={<StyleQuizScreen />} />
             <Route path="/settings" element={<SettingsScreen />} />
             <Route path="/privacy/data" element={<DataPrivacyScreen />} />
             <Route path="/account/password" element={<ResetPasswordScreen />} />

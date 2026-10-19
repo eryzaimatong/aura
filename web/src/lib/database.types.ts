@@ -286,7 +286,18 @@ export type Database = {
         Update: Partial<Measurements> & { shape?: BodyShape | null };
         Relationships: [];
       };
-      style_prints: ExportOnlyTable;
+      style_prints: {
+        Row: {
+          user_id: string; vector: string; axes: Record<string, number>; label: string | null;
+          confidence: number; quiz_answers: number[] | null; n_signals: number; updated_at: string;
+        };
+        Insert: {
+          user_id: string; vector: string; axes: Record<string, number>; label: string;
+          confidence: number; quiz_answers: number[]; n_signals: number;
+        };
+        Update: never;
+        Relationships: [];
+      };
       // Written by the API (POST /api/recommendations/refresh); read here.
       recommendations: {
         Row: RecommendationRow;

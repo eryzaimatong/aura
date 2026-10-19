@@ -20,12 +20,15 @@ export function ProfileScreen() {
   const { state: closet } = useCloset();
   const [looks, setLooks] = useState<number | null>(null);
   const [shape, setShape] = useState<BodyShape | null>(null);
+  const [printConf, setPrintConf] = useState<number | null>(null);
 
   useEffect(() => {
     supabase.from('outfits').select('id', { count: 'exact', head: true }).eq('user_id', profile.id)
       .then(({ count }) => setLooks(count ?? 0));
     supabase.from('measurements').select('shape').eq('user_id', profile.id).maybeSingle()
       .then(({ data }) => setShape(data?.shape ?? null));
+    supabase.from('style_prints').select('confidence').eq('user_id', profile.id).maybeSingle()
+      .then(({ data }) => setPrintConf(data?.confidence ?? null));
   }, [profile.id]);
 
   const card = cardState.status === 'ready' ? cardState.card : null;
@@ -60,7 +63,8 @@ export function ProfileScreen() {
           <ListRow label="Aura Card" value={card?.season ? SEASON_NAMES[card.season] : card ? 'Colors to finish' : 'Scan'}
             onClick={() => navigate(card ? '/mirror/card' : '/mirror')} />
           <ListRow label="Body measurements" value={shape ? SHAPE_NAMES[shape] : 'Add'} onClick={() => navigate('/profile/measurements')} />
-          <ListRow label="Style Print" soon />
+          <ListRow label="Style Print" value={printConf === null ? 'Take the quiz' : `${Math.round(printConf * 100)}% confident`}
+            onClick={() => navigate('/profile/style')} />
           <ListRow label="Glow-up roadmap" soon />
         </ListSection>
         <ListSection title="Account">
