@@ -80,7 +80,8 @@ The full rule set is in [`AURA-BRIEF.md`](AURA-BRIEF.md#3-hard-rules).
 
 1. In the **SQL Editor**, run the files in `db/` **in order**:
    `000_schema.sql` → `001_rls_hardening.sql` → `002_wear_log_ownership.sql` → `003_table_grants.sql`
-   → `004_closet_storage.sql` → `005_delete_my_data.sql`. Migrations 001–005 are safe to re-run.
+   → `004_closet_storage.sql` → `005_delete_my_data.sql` → `006_recommendation_grants.sql`.
+   Migrations 001–006 are safe to re-run.
 2. Under **Authentication → URL Configuration**:
    - Set **Site URL** to `http://localhost:5173`.
    - Add `http://localhost:5173/**` to **Redirect URLs**.
@@ -211,8 +212,18 @@ There's no PyTorch: everything runs on `onnxruntime`. Tagging takes about 2 s pe
 - **Weather** (`GET /api/weather`) comes from [Open-Meteo](https://open-meteo.com/) (free, no
   key), cached for 30 minutes. It defaults to Metro Manila. The user can opt in to their own
   location, rounded to about 11 km and kept only on the device.
+- **Trips** (`POST /api/trips/plan`): the place name is looked up with Open-Meteo's geocoder
+  (only the name is sent, never the user's location), then the daily forecast is fetched for the
+  trip dates. Forecasts reach 16 days ahead; later days are planned without weather and the
+  screen says so. The generator runs once per day (plus one look per evening occasion), with a
+  bonus for reusing pieces already packed. Cool nights add a layer from the closet; missing
+  closed shoes for rain, a warm layer or a dressy piece are flagged as gaps. Saved trips go
+  to `trips` (the plan and looks sit in its `forecast` JSON); packing ticks stay on the device.
+- **Share card:** drawn on-device on a canvas from the card's own fields (season, palette, and
+  optionally face shape, undertone and first name). No selfie, no account link. Sharing is
+  hidden for 13–17 accounts.
 - **Analytics:** the app writes `events` rows (`scan_completed`, `item_added`, `wear_logged`,
-  `outfit_generated`, `outfit_worn`, `card_corrected`) **only** when `profiles.share_analytics`
+  `outfit_generated`, `outfit_worn`, `card_corrected`, `card_shared`) **only** when `profiles.share_analytics`
   is true. Props never hold personal data.
 
 ## Mira artwork
@@ -292,6 +303,9 @@ Also create `web/android/local.properties` with `sdk.dir=…` pointing at your A
 | 12 | Diary: streaks, utilisation, insights | ✅ |
 | 13 | Capacitor Android build | ✅ |
 | + | Profile, Settings, Data & privacy (export + scoped deletion), forgot password | ✅ |
+| + | Vanity (makeup, hair, colours), Measurements, Style quiz + Style Print, Glow-up roadmap | ✅ |
+| + | Trip planner, Share card | ✅ |
+| – | Shelf / product detail, Premium, Admin dashboards | not started |
 
 ### Known limitations
 
