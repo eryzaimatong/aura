@@ -7,17 +7,20 @@ export interface CheckboxProps {
   onChange: (checked: boolean) => void;
   children: ReactNode;
   disabled?: boolean;
+  /** Sand for agreement rows (default), paper for list choices. */
+  surface?: 'sand' | 'paper';
   className?: string;
 }
 
 /** Agreement row: sand card, gold-deep box, label text beside it. */
-export function Checkbox({ checked, onChange, children, disabled = false, className }: CheckboxProps) {
+export function Checkbox({ checked, onChange, children, disabled = false, surface = 'sand', className }: CheckboxProps) {
   const id = useId();
   return (
     <label
       htmlFor={id}
       className={cx(
-        'flex cursor-pointer items-start gap-3 rounded-md bg-sand p-4',
+        'flex cursor-pointer items-start gap-3 rounded-md p-4',
+        surface === 'paper' ? 'bg-paper shadow-soft' : 'bg-sand',
         'has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-gold-deep',
         disabled && 'cursor-not-allowed opacity-50',
         className,

@@ -5,6 +5,7 @@
  */
 import type { AgeBracket } from './ageBracket';
 import type { BodyShape, Measurements } from './bodyShape';
+import type { GoalRow, GoalState } from './roadmap';
 
 export type PlanTier = 'free' | 'premium';
 export type ConsentKind = 'face_scan' | 'analytics' | 'marketing' | 'guardian';
@@ -278,7 +279,12 @@ export type Database = {
       // Tables the app doesn't use yet but must include in a data export.
       undertone_quiz: ExportOnlyTable;
       trips: ExportOnlyTable;
-      goals: ExportOnlyTable;
+      goals: {
+        Row: GoalRow;
+        Insert: { user_id: string; title: string; detail?: string | null; state?: GoalState; sort_order?: number };
+        Update: { state?: GoalState; sort_order?: number; completed_at?: string | null };
+        Relationships: [];
+      };
       // Hard rule 6: no weight field, by design.
       measurements: {
         Row: Measurements & { user_id: string; shape: BodyShape | null; updated_at: string };
