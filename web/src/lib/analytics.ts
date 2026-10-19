@@ -7,7 +7,8 @@ export type EventName =
   | 'item_added'
   | 'wear_logged'
   | 'outfit_generated'
-  | 'outfit_worn';
+  | 'outfit_worn'
+  | 'card_shared';
 
 type Props = Record<string, string | number | boolean | null>;
 

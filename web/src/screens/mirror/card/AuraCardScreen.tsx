@@ -2,6 +2,8 @@ import { useNavigate } from 'react-router';
 import { Button } from '../../../components/Button';
 import { Mira } from '../../../components/Mira';
 import { Screen } from '../../../components/Screen';
+import { isMinor } from '../../../lib/ageBracket';
+import { useProfile } from '../../../lib/auth/context';
 import { ScreenHeader } from '../../../components/ScreenHeader';
 import { FormAlert } from '../../onboarding/FormAlert';
 import { useCurrentCard } from '../useCurrentCard';
@@ -11,6 +13,7 @@ import { ConfidencePanel } from './ConfidencePanel';
 export function AuraCardScreen() {
   const navigate = useNavigate();
   const { state, retry } = useCurrentCard();
+  const profile = useProfile();
 
   if (state.status === 'loading') {
     return (
@@ -55,9 +58,13 @@ export function AuraCardScreen() {
             <Button onClick={() => navigate('/vanity')}>See makeup</Button>
             <Button variant="outline" onClick={() => navigate('/looks')}>See outfits</Button>
           </div>
-          <Button variant="ghost" fullWidth onClick={() => navigate('/mirror/scan')}>
-            Scan again
-          </Button>
+          <div className="grid grid-cols-2 gap-3">
+            <Button variant="ghost" onClick={() => navigate('/mirror/scan')}>Scan again</Button>
+            {/* Hard rule 4: no sharing for 13–17. */}
+            {card.season && !isMinor(profile.age_bracket) && (
+              <Button variant="ghost" onClick={() => navigate('/mirror/card/share')}>Share my card</Button>
+            )}
+          </div>
         </>
       }
     >

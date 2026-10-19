@@ -21,6 +21,7 @@ import { ClosetScreen } from './screens/closet/ClosetScreen';
 import { ItemDetailScreen } from './screens/closet/ItemDetailScreen';
 import { QuickStartScreen } from './screens/closet/QuickStartScreen';
 import { DiaryScreen } from './screens/diary/DiaryScreen';
+import { ShareCardScreen } from './screens/mirror/card/ShareCardScreen';
 import { LookbookScreen } from './screens/looks/LookbookScreen';
 import { PlanTripScreen } from './screens/trips/PlanTripScreen';
 import { TripScreen } from './screens/trips/TripScreen';
@@ -78,6 +79,7 @@ export default function App() {
             </Route>
             <Route path="/mirror/quiz" element={<UndertoneQuizScreen />} />
             <Route path="/mirror/card" element={<AuraCardScreen />} />
+            <Route path="/mirror/card/share" element={<ShareCardScreen />} />
             <Route path="/mirror/correct" element={<CorrectionScreen />} />
             <Route path="/closet" element={<ClosetScreen />} />
             <Route path="/closet/add" element={<AddItemScreen />} />
