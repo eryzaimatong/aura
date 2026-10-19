@@ -3,7 +3,7 @@ import { NavBar, type Room } from './NavBar';
 
 const ROOM_PATHS: Record<Room, string> = {
   mirror: '/mirror/card',
-  vanity: '/rooms/vanity',
+  vanity: '/vanity',
   closet: '/closet',
   looks: '/looks',
   diary: '/diary',

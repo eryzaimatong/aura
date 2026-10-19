@@ -51,11 +51,12 @@ export function AuraCardScreen() {
     <Screen
       footer={
         <>
-          <Button variant="outline" fullWidth onClick={() => navigate('/mirror/scan')}>
+          <div className="grid grid-cols-2 gap-3">
+            <Button onClick={() => navigate('/vanity')}>See makeup</Button>
+            <Button variant="outline" onClick={() => navigate('/looks')}>See outfits</Button>
+          </div>
+          <Button variant="ghost" fullWidth onClick={() => navigate('/mirror/scan')}>
             Scan again
-          </Button>
-          <Button variant="ghost" fullWidth onClick={() => navigate('/')}>
-            Done
           </Button>
         </>
       }

@@ -185,6 +185,24 @@ export type WearStatsRow = {
 /** Read-only, untyped rows: only ever copied into a data export as-is. */
 type ExportOnlyTable = { Row: Record<string, unknown>; Insert: never; Update: never; Relationships: [] };
 
+export type RecKind = 'makeup' | 'hair' | 'colors' | 'product';
+export type RecVerdict = 'saved' | 'dismissed' | 'clicked' | 'bought';
+
+export type RecommendationRow = {
+  id: string;
+  user_id: string;
+  kind: RecKind;
+  product_id: string | null;
+  payload: { key: string; title: string; swatches: string[]; icon: string; card_id: string } | null;
+  /** Hard rule 7: never empty. */
+  reason: string;
+  /** Hard rule 9: the only ranking signal. */
+  fit_score: number;
+  gap_filled: string | null;
+  algo_v: string;
+  created_at: string;
+};
+
 export type DeleteScope = 'scans' | 'closet' | 'all';
 export type DataRequestKind = 'export' | 'delete_scans' | 'delete_closet' | 'delete_all';
 
@@ -262,8 +280,19 @@ export type Database = {
       goals: ExportOnlyTable;
       measurements: ExportOnlyTable;
       style_prints: ExportOnlyTable;
-      recommendations: ExportOnlyTable;
-      rec_feedback: ExportOnlyTable;
+      // Written by the API (POST /api/recommendations/refresh); read here.
+      recommendations: {
+        Row: RecommendationRow;
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      rec_feedback: {
+        Row: { rec_id: string; user_id: string; verdict: RecVerdict; created_at: string };
+        Insert: { rec_id: string; user_id: string; verdict: RecVerdict };
+        Update: never;
+        Relationships: [];
+      };
       outfit_items: ExportOnlyTable;
       // Audit trail of export / deletion requests (hard rule 5).
       data_requests: {

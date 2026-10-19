@@ -18,6 +18,7 @@ import { QuickStartScreen } from './screens/closet/QuickStartScreen';
 import { DiaryScreen } from './screens/diary/DiaryScreen';
 import { LookbookScreen } from './screens/looks/LookbookScreen';
 import { TodayScreen } from './screens/looks/TodayScreen';
+import { VanityScreen } from './screens/vanity/VanityScreen';
 import { ComponentsScreen } from './screens/components/ComponentsScreen';
 import { AuraCardScreen } from './screens/mirror/card/AuraCardScreen';
 import { ConsentScreen } from './screens/mirror/ConsentScreen';
@@ -77,6 +78,7 @@ export default function App() {
             <Route path="/today" element={<TodayScreen />} />
             <Route path="/looks" element={<LookbookScreen />} />
             <Route path="/diary" element={<DiaryScreen />} />
+            <Route path="/vanity" element={<VanityScreen />} />
             <Route path="/rooms/:room" element={<RoomPlaceholderScreen />} />
             <Route path="/profile" element={<ProfileScreen />} />
             <Route path="/settings" element={<SettingsScreen />} />

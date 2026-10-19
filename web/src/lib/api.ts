@@ -16,7 +16,7 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(path: string, init?: RequestInit & { auth?: boolean }): Promise<T> {
+export async function request<T>(path: string, init?: RequestInit & { auth?: boolean }): Promise<T> {
   const headers = new Headers(init?.headers);
   // FormData sets its own multipart boundary.
   if (!(init?.body instanceof FormData)) headers.set('Content-Type', 'application/json');

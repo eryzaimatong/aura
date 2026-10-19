@@ -53,5 +53,8 @@ class SupabaseRest:
             params["on_conflict"] = ignore_conflicts_on
         return await self._send("POST", table, params=params, json=rows, prefer=prefer)
 
+    async def delete(self, table: str, filters: dict[str, str]) -> None:
+        await self._send("DELETE", table, params=filters)
+
     async def update(self, table: str, filters: dict[str, str], values: Row) -> list[Row]:
         return await self._send("PATCH", table, params=filters, json=values, prefer="return=representation")
