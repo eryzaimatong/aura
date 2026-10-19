@@ -7,7 +7,7 @@ const SLOT_ORDER = ['dress', 'top', 'bottom', 'outerwear', 'shoes', 'bag', 'acce
 const TINTS = ['bg-tint-lilac', 'bg-tint-sage', 'bg-tint-peach', 'bg-tint-blue', 'bg-tint-pink'];
 
 /** The outfit as a collage: main pieces in a tall left column, the rest stacked on the right. */
-export function OutfitCollage({ outfit, items, urls }: { outfit: GeneratedOutfit; items: ClosetItem[]; urls: Map<string, string> }) {
+export function OutfitCollage({ outfit, items, urls }: { outfit: Pick<GeneratedOutfit, 'pieces'>; items: ClosetItem[]; urls: Map<string, string> }) {
   const pieces = [...outfit.pieces]
     .sort((a, b) => SLOT_ORDER.indexOf(a.slot) - SLOT_ORDER.indexOf(b.slot))
     .map((p) => items.find((i) => i.id === p.id))

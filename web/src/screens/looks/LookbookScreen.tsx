@@ -43,7 +43,10 @@ export function LookbookScreen() {
     <Screen className="pb-32">
       <header className="flex items-end justify-between">
         <h1 className="font-display text-h1 font-semibold">The Lookbook</h1>
-        <Link to="/today" className="text-label font-bold text-gold-deep underline">Today’s pick</Link>
+        <span className="flex gap-4">
+          <Link to="/trips" className="text-label font-bold text-gold-deep underline">Trips</Link>
+          <Link to="/today" className="text-label font-bold text-gold-deep underline">Today’s pick</Link>
+        </span>
       </header>
       <div className="-mx-gutter mt-4 flex gap-2 overflow-x-auto px-gutter pb-1">
         {OCCASIONS.map((o) => (

@@ -108,7 +108,8 @@ def _weather_fit(p: Piece, w: Weather | None) -> float:
     return s
 
 
-def piece_score(p: Piece, occasion: str | None, w: Weather | None, today: date, avoid: set[str], vecs: dict[str, np.ndarray]) -> float:
+def piece_score(p: Piece, occasion: str | None, w: Weather | None, today: date, avoid: set[str], vecs: dict[str, np.ndarray],
+                prefer: frozenset[str] | set[str] = frozenset()) -> float:
     s = _occasion_fit(p, occasion, vecs) + _weather_fit(p, w)
     if p.in_palette:
         s += 0.5
@@ -118,6 +119,8 @@ def piece_score(p: Piece, occasion: str | None, w: Weather | None, today: date, 
         s += 0.3  # give unworn pieces an outing (closet utilisation)
     if p.id in avoid:
         s -= 0.8  # shuffle: move away from the outfit just shown
+    if p.id in prefer:
+        s += 0.6  # trip packing: reuse what's already in the bag
     return s
 
 
@@ -175,8 +178,10 @@ def _search(by_cat: dict[str, list[Piece]], scores: dict[str, float]) -> tuple[l
 
 
 def generate(closet: list[Piece], *, occasion: str | None, weather: Weather | None, today: date,
-             seed: int = 0, avoid: set[str] | None = None, season_name: str | None = None) -> Outfit:
+             seed: int = 0, avoid: set[str] | None = None, season_name: str | None = None,
+             prefer: set[str] | None = None) -> Outfit:
     avoid = avoid or set()
+    prefer = prefer or set()
     vecs = occasion_vectors()
     by_cat: dict[str, list[Piece]] = {}
     for p in closet:
@@ -184,12 +189,12 @@ def generate(closet: list[Piece], *, occasion: str | None, weather: Weather | No
 
     # Same jitter for both runs so the weather comparison below is like-for-like.
     jitter = {p.id: float(j) for p, j in zip(closet, np.random.default_rng(seed).gumbel(0, 0.6, len(closet)))}
-    scores = {p.id: piece_score(p, occasion, weather, today, avoid, vecs) + jitter[p.id] for p in closet}
+    scores = {p.id: piece_score(p, occasion, weather, today, avoid, vecs, prefer) + jitter[p.id] for p in closet}
     pieces, total = _search(by_cat, scores)
 
     note = None
     if weather is not None:
-        dry = {p.id: piece_score(p, occasion, None, today, avoid, vecs) + jitter[p.id] for p in closet}
+        dry = {p.id: piece_score(p, occasion, None, today, avoid, vecs, prefer) + jitter[p.id] for p in closet}
         note = _swap_note(_search(by_cat, dry)[0], pieces, weather)
 
     # Only claim "polished enough for work" when the chosen pieces actually lean that way.

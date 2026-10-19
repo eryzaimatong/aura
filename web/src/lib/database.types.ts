@@ -205,6 +205,27 @@ export type RecommendationRow = {
   created_at: string;
 };
 
+/** `forecast` keeps the whole plan context: daily weather plus the looks Mira suggested. */
+export type TripRow = {
+  id: string;
+  user_id: string;
+  place: string;
+  starts_on: string;
+  ends_on: string;
+  occasions: string[];
+  forecast: TripSaved | null;
+  item_ids: string[];
+  gaps: { kind: string; text: string }[];
+  created_at: string;
+};
+
+export type TripSaved = {
+  days: { date: string; min_c: number; max_c: number; rain_pct: number }[];
+  looks: { label: string; date: string | null; occasion: string | null; pieces: { id: string; slot: string }[]; reason: string; tags: string[] }[];
+  layer_note: string | null;
+  generator_v: string;
+};
+
 export type DeleteScope = 'scans' | 'closet' | 'all';
 export type DataRequestKind = 'export' | 'delete_scans' | 'delete_closet' | 'delete_all';
 
@@ -278,7 +299,12 @@ export type Database = {
       };
       // Tables the app doesn't use yet but must include in a data export.
       undertone_quiz: ExportOnlyTable;
-      trips: ExportOnlyTable;
+      trips: {
+        Row: TripRow;
+        Insert: Omit<TripRow, 'id' | 'created_at'>;
+        Update: never;
+        Relationships: [];
+      };
       goals: {
         Row: GoalRow;
         Insert: { user_id: string; title: string; detail?: string | null; state?: GoalState; sort_order?: number };

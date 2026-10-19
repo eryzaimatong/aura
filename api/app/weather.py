@@ -52,6 +52,54 @@ def parse(data: dict) -> WeatherNow:
     )
 
 
+GEOCODE = "https://geocoding-api.open-meteo.com/v1/search"
+FORECAST_DAYS_MAX = 16  # Open-Meteo's horizon
+
+
+@dataclass(frozen=True)
+class Place:
+    name: str
+    lat: float
+    lon: float
+
+
+@dataclass(frozen=True)
+class DayForecast:
+    date: str
+    min_c: float
+    max_c: float
+    rain_pct: int
+
+    def as_dict(self) -> dict[str, object]:
+        return asdict(self)
+
+
+async def geocode(name: str, client: httpx.AsyncClient) -> Place | None:
+    """Place name → coordinates; prefers Philippine matches for a PH-first app."""
+    res = await client.get(GEOCODE, params={"name": name, "count": 5, "language": "en", "format": "json"}, timeout=8)
+    res.raise_for_status()
+    results = res.json().get("results") or []
+    if not results:
+        return None
+    best = next((r for r in results if r.get("country_code") == "PH"), results[0])
+    return Place(best["name"], round(float(best["latitude"]), 2), round(float(best["longitude"]), 2))
+
+
+async def daily_forecast(place: Place, start: str, end: str, client: httpx.AsyncClient) -> list[DayForecast]:
+    """Daily min/max and rain chance for the trip dates that fall inside the forecast horizon."""
+    res = await client.get(OPEN_METEO, params={
+        "latitude": place.lat, "longitude": place.lon, "timezone": "auto", "start_date": start, "end_date": end,
+        "daily": "temperature_2m_max,temperature_2m_min,precipitation_probability_max",
+    }, timeout=8)
+    if res.status_code == 400:  # dates beyond the horizon
+        return []
+    res.raise_for_status()
+    d = res.json()["daily"]
+    return [DayForecast(t, round(float(lo), 1), round(float(hi), 1), int(p or 0))
+            for t, lo, hi, p in zip(d["time"], d["temperature_2m_min"], d["temperature_2m_max"], d["precipitation_probability_max"])
+            if lo is not None and hi is not None]
+
+
 _cache: dict[tuple[float, float], tuple[float, WeatherNow]] = {}
 
 

@@ -161,3 +161,54 @@ export function wearOutfit(body: WearRequest): Promise<{ outfit_id: string; newl
 export function postUndertoneQuiz(answers: UndertoneAnswers): Promise<AuraCard> {
   return request<AuraCard>('/api/cards/current/undertone', { method: 'POST', auth: true, body: JSON.stringify(answers) });
 }
+
+export type TripOccasion = 'casual' | 'work' | 'date' | 'formal' | 'travel';
+
+export interface TripDay {
+  date: string;
+  min_c: number;
+  max_c: number;
+  rain_pct: number;
+}
+
+export interface TripLook {
+  label: string;
+  /** Null for evening looks (dinner out, formal event). */
+  date: string | null;
+  occasion: Occasion | null;
+  pieces: GeneratedOutfit['pieces'];
+  /** Hard rule 7: always present. */
+  reason: string;
+  tags: string[];
+}
+
+export interface TripGap {
+  kind: 'warm_layer' | 'closed_shoes' | 'dressy_piece';
+  text: string;
+}
+
+export interface TripPlan {
+  /** The place as the weather service named it, e.g. "Baguio City". */
+  place: string;
+  starts_on: string;
+  ends_on: string;
+  occasions: TripOccasion[];
+  /** Empty when the trip is more than 16 days away or the forecast was unavailable. */
+  forecast: TripDay[];
+  looks: TripLook[];
+  packed_ids: string[];
+  gaps: TripGap[];
+  layer_note: string | null;
+  generator_v: string;
+}
+
+export interface TripRequest {
+  place: string;
+  starts_on: string;
+  ends_on: string;
+  occasions: TripOccasion[];
+}
+
+export function planTrip(body: TripRequest): Promise<TripPlan> {
+  return request<TripPlan>('/api/trips/plan', { method: 'POST', auth: true, body: JSON.stringify(body) });
+}
