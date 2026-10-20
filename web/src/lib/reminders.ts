@@ -75,12 +75,18 @@ export async function clearReminder(): Promise<void> {
   await LocalNotifications.cancel({ notifications: [{ id: ID }] }).catch(() => undefined);
 }
 
+/** Same-app paths only: "//host", "/\host" or anything with a scheme would leave the app. */
+export function isAppPath(path: unknown): path is string {
+  return typeof path === 'string' && path.startsWith('/') && !path.startsWith('//')
+    && !path.includes('\\') && !path.includes(':');
+}
+
 /** Tapping the notification opens Today. */
 export function initReminderTaps(): void {
   if (!isNative) return;
   void LocalNotifications.addListener('localNotificationActionPerformed', ({ notification }) => {
     const path = (notification.extra as { path?: unknown } | undefined)?.path;
-    if (typeof path === 'string' && path.startsWith('/')) window.location.assign(path);
+    if (isAppPath(path)) window.location.assign(path);
   });
 }
 
