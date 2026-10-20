@@ -12,6 +12,10 @@ export function apiErrorMessage(err: unknown): string {
         return 'Your session ended. Log in again and Mira will pick up where you left off.';
       case 'no_card':
         return 'There’s no Aura Card yet. Take a selfie first.';
+      case 'timeout':
+        return 'Mira is taking too long to answer. Your connection may be slow. Try again in a moment.';
+      case 'rate_limited':
+        return 'That’s a lot in a short time. Give Mira a few minutes, then try again.';
       case 'item_not_found':
         return 'That piece isn’t in your closet any more.';
       case 'cannot_style_category':

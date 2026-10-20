@@ -16,7 +16,10 @@ export class ApiError extends Error {
   }
 }
 
-export async function request<T>(path: string, init?: RequestInit & { auth?: boolean }): Promise<T> {
+/** Most calls answer in a second or two; past this, a weak connection is the likely cause. */
+const DEFAULT_TIMEOUT_MS = 20_000;
+
+export async function request<T>(path: string, init?: RequestInit & { auth?: boolean; timeoutMs?: number }): Promise<T> {
   const headers = new Headers(init?.headers);
   // FormData sets its own multipart boundary.
   if (!(init?.body instanceof FormData)) headers.set('Content-Type', 'application/json');
@@ -25,7 +28,13 @@ export async function request<T>(path: string, init?: RequestInit & { auth?: boo
     if (!data.session) throw new ApiError(401, 'not_signed_in');
     headers.set('Authorization', `Bearer ${data.session.access_token}`);
   }
-  const res = await fetch(`${API_URL}${path}`, { ...init, headers });
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, { ...init, headers, signal: init?.signal ?? AbortSignal.timeout(init?.timeoutMs ?? DEFAULT_TIMEOUT_MS) });
+  } catch (err) {
+    if (err instanceof DOMException && (err.name === 'TimeoutError' || err.name === 'AbortError')) throw new ApiError(0, 'timeout');
+    throw err;
+  }
   if (!res.ok) {
     const body: unknown = await res.json().catch(() => null);
     const detail = typeof body === 'object' && body !== null && 'detail' in body ? (body as { detail: unknown }).detail : null;
@@ -106,7 +115,8 @@ export interface TagResponse {
 export function tagItem(photo: Blob): Promise<TagResponse> {
   const form = new FormData();
   form.append('image', photo, 'item.jpg');
-  return request<TagResponse>('/api/items/tag', { method: 'POST', auth: true, body: form });
+  // Cut-out + CLIP is the slowest call, especially on a small server.
+  return request<TagResponse>('/api/items/tag', { method: 'POST', auth: true, body: form, timeoutMs: 60_000 });
 }
 
 export type Occasion = 'casual' | 'class' | 'work' | 'date' | 'formal' | 'travel';

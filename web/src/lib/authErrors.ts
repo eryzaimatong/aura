@@ -1,5 +1,8 @@
 import { AuthError } from '@supabase/supabase-js';
 
+const OFFLINE = 'Mira can’t reach the internet. Check your connection and try again.';
+const SLOW = 'This is taking too long. Your connection may be slow. Try again in a moment.';
+
 /** Turns Supabase auth errors into Mira-voiced copy. Unknown errors keep their message. */
 export function authErrorMessage(err: unknown): string {
   if (err instanceof AuthError) {
@@ -20,10 +23,14 @@ export function authErrorMessage(err: unknown): string {
         return 'Sign-ups are paused right now. Please try again later.';
     }
     if (err.status === 0 || err.name === 'AuthRetryableFetchError') {
-      return 'Mira can’t reach the internet. Check your connection and try again.';
+      return OFFLINE;
     }
     return err.message;
   }
-  if (err instanceof TypeError) return 'Mira can’t reach the internet. Check your connection and try again.';
-  return err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+  if (err instanceof TypeError) return OFFLINE;
+  // Database errors arrive as plain objects; a timed-out or failed fetch shows up in the message.
+  const message = typeof err === 'object' && err !== null && 'message' in err ? String((err as { message: unknown }).message) : '';
+  if (/TimeoutError|AbortError|timed out/i.test(message)) return SLOW;
+  if (/Failed to fetch|NetworkError|Load failed/i.test(message)) return OFFLINE;
+  return message || 'Something went wrong. Please try again.';
 }
