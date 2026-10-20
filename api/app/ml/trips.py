@@ -47,8 +47,11 @@ class TripPlan:
 
 
 def plan_trip(closet: list[Piece], days: list[TripDay], occasions: list[str], *,
-              today: date, season_name: str | None = None) -> TripPlan:
-    """`occasions`: the trip's occasions; daytime ones rotate across days, evening ones get one look each."""
+              today: date, season_name: str | None = None, day_occasions: list[str] | None = None) -> TripPlan:
+    """
+    `occasions`: the trip's occasions; daytime ones rotate across days, evening ones get one look each.
+    `day_occasions`: one occasion per day instead of rotating (the week planner).
+    """
     daytime = [o for o in occasions if o not in EVENING] or ["casual"]
     evenings = [o for o in occasions if o in EVENING]
     packed: dict[str, Piece] = {}
@@ -66,7 +69,8 @@ def plan_trip(closet: list[Piece], days: list[TripDay], occasions: list[str], *,
         prev = {p.id for p in o.pieces if p.category in ("top", "bottom", "dress")}
 
     for i, d in enumerate(days):
-        add(d.on.strftime("%a %d %b").replace(" 0", " "), d.on, daytime[i % len(daytime)], d.weather, i)
+        occ = day_occasions[i] if day_occasions else daytime[i % len(daytime)]
+        add(d.on.strftime("%a %d %b").replace(" 0", " "), d.on, occ, d.weather, i)
     for j, occ in enumerate(evenings):
         night = days[min(j + 1, len(days) - 1)]
         add(EVENING_LABEL[occ], None, occ, night.weather, 100 + j)

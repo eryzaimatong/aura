@@ -223,3 +223,17 @@ export interface TripRequest {
 export function planTrip(body: TripRequest): Promise<TripPlan> {
   return request<TripPlan>('/api/trips/plan', { method: 'POST', auth: true, body: JSON.stringify(body) });
 }
+
+export type WeekOccasion = 'casual' | 'class' | 'work' | 'date' | 'travel';
+
+export interface WeekPlan {
+  /** "Metro Manila" when using the default area; null when using the user's own coarse location. */
+  place: string | null;
+  forecast: TripDay[];
+  looks: TripLook[];
+  generator_v: string;
+}
+
+export function planWeek(body: { start: string; weekday: WeekOccasion; weekend: WeekOccasion; lat?: number; lon?: number }): Promise<WeekPlan> {
+  return request<WeekPlan>('/api/week/plan', { method: 'POST', auth: true, body: JSON.stringify(body) });
+}

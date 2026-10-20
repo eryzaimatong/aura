@@ -28,6 +28,7 @@ import { EditItemScreen } from './screens/closet/EditItemScreen';
 import { ReminderScreen } from './screens/account/ReminderScreen';
 import { LookbookScreen } from './screens/looks/LookbookScreen';
 import { SavedLooksScreen } from './screens/looks/SavedLooksScreen';
+import { WeekScreen } from './screens/looks/WeekScreen';
 import { PlanTripScreen } from './screens/trips/PlanTripScreen';
 import { TripScreen } from './screens/trips/TripScreen';
 import { TripsScreen } from './screens/trips/TripsScreen';
@@ -95,6 +96,7 @@ export default function App() {
             <Route path="/today" element={<TodayScreen />} />
             <Route path="/looks" element={<LookbookScreen />} />
             <Route path="/looks/saved" element={<SavedLooksScreen />} />
+            <Route path="/looks/week" element={<WeekScreen />} />
             <Route path="/trips" element={<TripsScreen />} />
             <Route path="/trips/new" element={<PlanTripScreen />} />
             <Route path="/trips/:id" element={<TripScreen />} />

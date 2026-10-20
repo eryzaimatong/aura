@@ -1,4 +1,6 @@
-from datetime import timedelta
+from datetime import date, timedelta
+
+import httpx
 
 from app.ml.trips import TripDay, plan_trip
 from app.routers import outfits as outfits_router
@@ -73,3 +75,35 @@ def test_plan_rejects_long_trips_and_unknown_places(client, monkeypatch):
     assert c.post("/api/trips/plan", json={**base, "ends_on": (start + timedelta(days=20)).isoformat()}).status_code == 422
     assert c.post("/api/trips/plan", json={**base, "ends_on": start.isoformat()}).status_code == 404
     assert c.post("/api/trips/plan", json={**base, "ends_on": start.isoformat(), "occasions": ["class"]}).status_code == 422
+
+
+def test_week_plan_uses_weekday_and_weekend_occasions(client, monkeypatch):
+    seen = {}
+
+    async def fake_forecast(place, start, end, _):
+        seen["place"] = place
+        return [DayForecast(start, 25.0, 32.0, 20)]
+
+    monkeypatch.setattr(trips_router, "daily_forecast", fake_forecast)
+    c, _ = client(basic_closet())
+    today = outfits_router._utc_today()
+    res = c.post("/api/week/plan", json={"start": today.isoformat(), "weekday": "work", "weekend": "casual", "lat": 14.5547, "lon": 121.0244})
+    assert res.status_code == 200, res.text
+    body = res.json()
+    assert len(body["looks"]) == 7 and all(lk["reason"] for lk in body["looks"])
+    for lk in body["looks"]:
+        weekend = date.fromisoformat(lk["date"]).weekday() >= 5
+        assert lk["occasion"] == ("casual" if weekend else "work")
+    assert (seen["place"].lat, seen["place"].lon) == (14.6, 121.0)  # rounded, never precise
+    assert body["place"] is None
+
+
+def test_week_plan_defaults_and_rejects_far_dates(client, monkeypatch):
+    async def fail(*_):
+        raise httpx.ConnectError("offline")
+
+    monkeypatch.setattr(trips_router, "daily_forecast", fail)
+    c, _ = client(basic_closet())
+    body = c.post("/api/week/plan", json={"start": outfits_router._utc_today().isoformat()}).json()
+    assert body["place"] == "Metro Manila" and body["forecast"] == [] and len(body["looks"]) == 7
+    assert c.post("/api/week/plan", json={"start": "2020-01-01"}).status_code == 422

@@ -51,3 +51,25 @@ class TripOut(BaseModel):
     gaps: list[GapOut]
     layer_note: str | None
     generator_v: str
+
+
+WeekOccasion = Literal["casual", "class", "work", "date", "travel"]
+
+
+class WeekIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    # The user's local "today" (the server runs on UTC).
+    start: date
+    weekday: WeekOccasion = "class"
+    weekend: WeekOccasion = "casual"
+    # Coarse location the user opted into (rounded on the device); default Metro Manila.
+    lat: float | None = Field(default=None, ge=-90, le=90)
+    lon: float | None = Field(default=None, ge=-180, le=180)
+
+
+class WeekOut(BaseModel):
+    place: str | None
+    forecast: list[DayOut]
+    looks: list[TripLookOut]
+    generator_v: str
