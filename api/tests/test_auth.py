@@ -27,6 +27,7 @@ def project(monkeypatch: pytest.MonkeyPatch):
             return SimpleNamespace(key=PRIVATE_KEY.public_key())
 
     monkeypatch.setattr(auth, "_jwks_client", lambda: FakeJwks())
+    auth._confirmed.clear()
 
 
 def claims(**over: Any) -> dict[str, Any]:
@@ -97,3 +98,24 @@ def test_garbage_token_rejected():
     with pytest.raises(HTTPException) as e:
         call("not-a-jwt")
     assert e.value.detail == "invalid_token"
+
+
+def test_supabase_confirmation_is_cached_briefly(monkeypatch):
+    calls = fake_auth_api(monkeypatch, 200, {"id": "user-1"})
+    token = hs256()
+    assert call(token).id == "user-1" and call(token).id == "user-1"
+    assert len(calls) == 1
+    # Past the cache window, Supabase is asked again.
+    key = auth._token_key(token)
+    auth._confirmed[key] = (auth._confirmed[key][0], 0.0)
+    call(token)
+    assert len(calls) == 2
+
+
+def test_rejections_are_never_cached(monkeypatch):
+    calls = fake_auth_api(monkeypatch, 401)
+    token = hs256()
+    for _ in range(2):
+        with pytest.raises(HTTPException):
+            call(token)
+    assert len(calls) == 2

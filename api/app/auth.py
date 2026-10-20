@@ -1,4 +1,7 @@
+import hashlib
 import logging
+import threading
+import time
 from dataclasses import dataclass
 from functools import lru_cache
 
@@ -45,11 +48,51 @@ def _verify_locally(token: str) -> str:
     return sub
 
 
+# Tokens Supabase Auth has confirmed, so a burst of API calls costs one round trip, not one each.
+# 60 s at most and never past the token's own expiry. (Locally verified tokens are trusted until
+# expiry anyway, so this adds no new window.)
+_CONFIRMED_TTL_S = 60.0
+_CONFIRMED_MAX = 5000
+_confirmed: dict[str, tuple[str, float]] = {}
+_confirmed_lock = threading.Lock()
+
+
+def _token_key(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()  # never keep raw tokens in memory longer than needed
+
+
+def _remember(token: str, user_id: str) -> None:
+    try:
+        exp = jwt.decode(token, options={"verify_signature": False}).get("exp")
+    except jwt.PyJWTError:
+        return
+    if not isinstance(exp, (int, float)):
+        return
+    ttl = min(_CONFIRMED_TTL_S, exp - time.time())
+    if ttl <= 0:
+        return
+    with _confirmed_lock:
+        if len(_confirmed) >= _CONFIRMED_MAX:
+            _confirmed.clear()
+        _confirmed[_token_key(token)] = (user_id, time.monotonic() + ttl)
+
+
+def _recall(token: str) -> str | None:
+    with _confirmed_lock:
+        hit = _confirmed.get(_token_key(token))
+    if hit and time.monotonic() < hit[1]:
+        return hit[0]
+    return None
+
+
 def _verify_with_supabase(token: str) -> str:
     """
     Fallback for tokens signed with the legacy shared secret (HS256), or a key not
     yet in the JWKS: Supabase Auth itself confirms the session.
     """
+    cached = _recall(token)
+    if cached is not None:
+        return cached
     try:
         res = httpx.get(
             f"{settings.supabase_issuer}/user",
@@ -65,6 +108,7 @@ def _verify_with_supabase(token: str) -> str:
     user_id = res.json().get("id")
     if not isinstance(user_id, str):
         raise _Rejected("invalid_token")
+    _remember(token, user_id)
     return user_id
 
 
