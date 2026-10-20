@@ -9,6 +9,7 @@ from app.auth import CurrentUser, get_current_user
 from app.deps import get_db
 from app.ml.outfits import GENERATOR_VERSION, NotEnoughItems, Piece, Weather, generate
 from app.schemas.outfits import GenerateIn, OutfitOut, OutfitPieceOut, SaveIn, SaveOut, WearIn, WearOut, WeatherOut
+from app.ratelimit import generate_limit
 from app.supabase_rest import Row, SupabaseRest
 from app.weather import DEFAULT_LAT, DEFAULT_LON, DEFAULT_PLACE, current_weather
 
@@ -59,7 +60,7 @@ async def _season_name(db: SupabaseRest, user_id: str) -> str | None:
 
 
 @router.post("/outfits/generate", response_model=OutfitOut)
-async def generate_outfit(body: GenerateIn, user: CurrentUser = Depends(get_current_user),
+async def generate_outfit(body: GenerateIn, user: CurrentUser = Depends(generate_limit),
                           db: SupabaseRest = Depends(get_db)) -> OutfitOut:
     closet = await _closet(db, user.id)
     weather = Weather(body.weather.temp_c, body.weather.feels_c, body.weather.rain_pct) if body.weather else None

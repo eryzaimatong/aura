@@ -25,7 +25,12 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     yield
 
 
-app = FastAPI(title="AURA API", version=APP_VERSION, lifespan=lifespan)
+app = FastAPI(
+    title="AURA API", version=APP_VERSION, lifespan=lifespan,
+    docs_url="/docs" if settings.expose_docs else None,
+    redoc_url="/redoc" if settings.expose_docs else None,
+    openapi_url="/openapi.json" if settings.expose_docs else None,
+)
 
 app.add_middleware(
     CORSMiddleware,

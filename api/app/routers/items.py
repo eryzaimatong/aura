@@ -6,11 +6,12 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from fastapi.concurrency import run_in_threadpool
 from PIL import UnidentifiedImageError
 
-from app.auth import CurrentUser, get_current_user
+from app.auth import CurrentUser
 from app.deps import get_db
 from app.ml.colors import color_name, hex_to_rgb, palette_match, srgb_to_lab
 from app.ml.garments import TAGGER_VERSION, TaggerUnavailable, get_tagger
 from app.schemas.items import CategoryGuessOut, ColorOut, SimilarOut, TagOut
+from app.ratelimit import tag_limit
 from app.supabase_rest import SupabaseRest
 
 router = APIRouter(prefix="/api/items", tags=["items"])
@@ -59,7 +60,7 @@ async def _similar(db: SupabaseRest, user_id: str, category: str, embedding: lis
 
 
 @router.post("/tag", response_model=TagOut)
-async def tag_item(image: UploadFile = File(...), user: CurrentUser = Depends(get_current_user),
+async def tag_item(image: UploadFile = File(...), user: CurrentUser = Depends(tag_limit),
                    db: SupabaseRest = Depends(get_db)) -> TagOut:
     """
     Garment photo → cut-out WebP, category, colours, palette match, CLIP embedding.

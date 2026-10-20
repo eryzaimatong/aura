@@ -3,11 +3,12 @@ from datetime import timedelta
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.auth import CurrentUser, get_current_user
+from app.auth import CurrentUser
 from app.deps import get_db
 from app.ml.outfits import GENERATOR_VERSION, NotEnoughItems
 from app.ml.trips import MAX_DAYS, TripDay, plan_trip
 from app.routers.outfits import _closet, _season_name, _utc_today
+from app.ratelimit import plan_limit
 from app.schemas.outfits import OutfitPieceOut
 from app.schemas.trips import DayOut, GapOut, TripIn, TripLookOut, TripOut, WeekIn, WeekOut
 from app.supabase_rest import SupabaseRest
@@ -18,7 +19,7 @@ router = APIRouter(prefix="/api", tags=["trips"])
 
 
 @router.post("/trips/plan", response_model=TripOut)
-async def plan(body: TripIn, user: CurrentUser = Depends(get_current_user),
+async def plan(body: TripIn, user: CurrentUser = Depends(plan_limit),
                db: SupabaseRest = Depends(get_db)) -> TripOut:
     today = _utc_today()
     n_days = (body.ends_on - body.starts_on).days + 1
@@ -71,7 +72,7 @@ WEEK_DAYS = 7
 
 
 @router.post("/week/plan", response_model=WeekOut)
-async def plan_week(body: WeekIn, user: CurrentUser = Depends(get_current_user),
+async def plan_week(body: WeekIn, user: CurrentUser = Depends(plan_limit),
                     db: SupabaseRest = Depends(get_db)) -> WeekOut:
     """Seven days of outfits from today, with the daily forecast for the user's area."""
     _check_local_date(body.start)

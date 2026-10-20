@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     supabase_url: str = ""
     supabase_publishable_key: str = ""
 
+    # Interactive API docs (/docs, /redoc, /openapi.json). Off unless switched on, so a
+    # deployed API doesn't publish its whole surface; set EXPOSE_DOCS=true locally.
+    expose_docs: bool = False
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
