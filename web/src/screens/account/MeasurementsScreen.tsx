@@ -34,6 +34,9 @@ export function MeasurementsScreen() {
   const [texts, setTexts] = useState<Texts>(EMPTY);
   const [errors, setErrors] = useState<Partial<Record<keyof Measurements, string>>>({});
   const [saving, setSaving] = useState(false);
+  // Saving before the stored values load would overwrite them with blanks, so wait for the load.
+  const [loaded, setLoaded] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   // Stored in cm; shown in the user's unit.
@@ -41,14 +44,17 @@ export function MeasurementsScreen() {
   const fromCm = (n: number) => (inches ? n / CM_PER_IN : n);
 
   useEffect(() => {
-    supabase.from('measurements').select('*').eq('user_id', profile.id).maybeSingle().then(({ data }) => {
+    supabase.from('measurements').select('*').eq('user_id', profile.id).maybeSingle().then(({ data, error: err }) => {
+      if (err) return setError(authErrorMessage(err));
+      setError(null);
+      setLoaded(true);
       if (!data) return;
       setTexts(Object.fromEntries(FIELDS.map(({ key }) => {
         const v = data[key];
         return [key, v == null ? '' : String(Math.round(fromCm(v) * 10) / 10)];
       })) as Texts);
     });
-  }, [profile.id, inches]);
+  }, [profile.id, inches, attempt]); // eslint-disable-line react-hooks/exhaustive-deps -- fromCm follows `inches`
 
   const valueCm = (key: keyof Measurements): number | null => {
     const n = parseLength(texts[key]);
@@ -85,7 +91,9 @@ export function MeasurementsScreen() {
     <Screen
       footer={
         <>
-          <Button type="submit" form={FORM_ID} fullWidth disabled={saving}>{saving ? 'Saving…' : 'Save measurements'}</Button>
+          {loaded
+            ? <Button type="submit" form={FORM_ID} fullWidth disabled={saving}>{saving ? 'Saving…' : 'Save measurements'}</Button>
+            : <Button fullWidth variant="outline" disabled={!error} onClick={() => setAttempt((n) => n + 1)}>{error ? 'Try loading again' : 'Loading…'}</Button>}
           <Button variant="ghost" fullWidth onClick={() => navigate('/profile')}>Skip, I will add later</Button>
         </>
       }
