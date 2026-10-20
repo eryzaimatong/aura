@@ -1,5 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
 import { CalendarHeart, Layers, ScanFace, Shirt } from 'lucide-react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { Card } from '../components/Card';
 import { Mira } from '../components/Mira';
@@ -14,6 +15,7 @@ import { OutfitCollage } from './looks/OutfitCollage';
 import { useOutfit } from './looks/useOutfit';
 import { useWeather } from './looks/useWeather';
 import { useCurrentCard } from './mirror/useCurrentCard';
+import { Tour, tourSeen } from './onboarding/Tour';
 
 const TILES: ReadonlyArray<{ to: string; label: string; Icon: LucideIcon; tint: string }> = [
   { to: '/mirror', label: 'Scan again', Icon: ScanFace, tint: 'bg-butter' },
@@ -28,6 +30,7 @@ function greeting(hour: number): string {
 
 export function HomeScreen() {
   const profile = useProfile();
+  const [touring, setTouring] = useState(() => !tourSeen(profile.id));
   const navigate = useNavigate();
   const { state: cardState } = useCurrentCard();
   const { state: closet } = useCloset();
@@ -49,6 +52,8 @@ export function HomeScreen() {
       : pick
         ? { line: `your ${pick.item.name.toLowerCase()} misses you`, body: `It’s ${idleLabel(pick)}. Tap and Mira will build a look around it.`, to: `/looks?item=${pick.item.id}` }
         : { line: 'found something for you', body: `${paletteTops} ${paletteTops === 1 ? 'top' : 'tops'} in your closet match your palette.`, to: '/closet' };
+
+  if (touring) return <Tour userId={profile.id} onDone={() => setTouring(false)} />;
 
   return (
     <Screen className="pb-32">
