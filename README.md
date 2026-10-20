@@ -335,6 +335,7 @@ Release builds shrink the native shell with R8 (`minifyEnabled`, `shrinkResource
 | + | Vanity (makeup, hair, colours), Measurements, Style quiz + Style Print, Glow-up roadmap | ✅ |
 | + | Trip planner, Share card | ✅ |
 | + | Saved looks, Style this piece, Week planner, wear history calendar, item editing, closet sort and outfit math, rediscover nudges, duplicate check, offline notice, morning reminder | ✅ |
+| + | Pack away (archive), replace photo, color search, first-run tour, shared closet cache, request timeouts, crash screen, on-demand screens, API rate limits, Play release setup | ✅ |
 | – | Shelf / product detail, Premium, Admin dashboards | not started |
 
 ### Known limitations
