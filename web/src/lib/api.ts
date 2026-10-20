@@ -139,10 +139,19 @@ export interface OutfitRequest {
   weather: Pick<WeatherNow, 'temp_c' | 'feels_c' | 'rain_pct'> | null;
   seed: number;
   avoid_ids: string[];
+  /** "Style this piece": the outfit is built around this item. */
+  require_id?: string | null;
 }
 
 export function generateOutfit(body: OutfitRequest): Promise<GeneratedOutfit> {
   return request<GeneratedOutfit>('/api/outfits/generate', { method: 'POST', auth: true, body: JSON.stringify(body) });
+}
+
+export type SaveRequest = Omit<WearRequest, 'worn_on'>;
+
+/** Keeps a look in Saved looks without logging a wear. */
+export function saveOutfit(body: SaveRequest): Promise<{ outfit_id: string }> {
+  return request('/api/outfits/save', { method: 'POST', auth: true, body: JSON.stringify(body) });
 }
 
 export interface WearRequest {

@@ -12,6 +12,10 @@ export function apiErrorMessage(err: unknown): string {
         return 'Your session ended. Log in again and Mira will pick up where you left off.';
       case 'no_card':
         return 'There’s no Aura Card yet. Take a selfie first.';
+      case 'item_not_found':
+        return 'That piece isn’t in your closet any more.';
+      case 'cannot_style_category':
+        return 'Mira can’t build a whole outfit around accessories yet. Try a top, bottom, dress, shoes, layer or bag.';
       case 'database_unreachable':
         return 'Mira couldn’t reach your account just now. Try again in a moment.';
     }

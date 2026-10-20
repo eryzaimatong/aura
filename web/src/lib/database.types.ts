@@ -294,6 +294,12 @@ export type Database = {
           reason: string | null; generator_v: string; saved: boolean; created_at: string;
         };
         Insert: never;
+        Update: { saved?: boolean };
+        Relationships: [];
+      };
+      outfit_items: {
+        Row: { outfit_id: string; item_id: string; slot: string };
+        Insert: never;
         Update: never;
         Relationships: [];
       };
@@ -343,7 +349,6 @@ export type Database = {
         Update: never;
         Relationships: [];
       };
-      outfit_items: ExportOnlyTable;
       // Audit trail of export / deletion requests (hard rule 5).
       data_requests: {
         Row: { id: string; user_id: string; kind: DataRequestKind; status: string; file_path: string | null; requested_at: string; completed_at: string | null };

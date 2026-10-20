@@ -8,6 +8,7 @@ import { apiErrorMessage } from '../../lib/apiErrors';
 import { FormAlert } from '../onboarding/FormAlert';
 import { useCloset } from '../closet/useCloset';
 import { OutfitPanel } from './OutfitPanel';
+import { SaveLookButton } from './SaveLookButton';
 import { useOutfit } from './useOutfit';
 import { useWeather } from './useWeather';
 import { WeatherCard } from './WeatherCard';
@@ -18,7 +19,7 @@ export function TodayScreen() {
   const { state: closet, reload } = useCloset();
   const weather = useWeather();
   const w = weather.state.status === 'loading' ? undefined : weather.state.status === 'ready' ? weather.state.weather : null;
-  const { state: outfit, shuffle, wear } = useOutfit(null, w);
+  const { state: outfit, shuffle, wear, save } = useOutfit(null, w);
   const [worn, setWorn] = useState<'idle' | 'saving' | 'done' | { error: string }>('idle');
 
   async function wearing() {
@@ -58,6 +59,7 @@ export function TodayScreen() {
           </Button>
         </div>
       )}
+      {ready && <SaveLookButton save={save} outfitKey={outfit.outfit.pieces.map((p) => p.id).join()} />}
       <WearStatus worn={worn} />
       {typeof worn === 'object' && <div className="mt-3"><FormAlert message={worn.error} /></div>}
 

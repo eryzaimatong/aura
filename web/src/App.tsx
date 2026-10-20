@@ -23,6 +23,7 @@ import { QuickStartScreen } from './screens/closet/QuickStartScreen';
 import { DiaryScreen } from './screens/diary/DiaryScreen';
 import { ShareCardScreen } from './screens/mirror/card/ShareCardScreen';
 import { LookbookScreen } from './screens/looks/LookbookScreen';
+import { SavedLooksScreen } from './screens/looks/SavedLooksScreen';
 import { PlanTripScreen } from './screens/trips/PlanTripScreen';
 import { TripScreen } from './screens/trips/TripScreen';
 import { TripsScreen } from './screens/trips/TripsScreen';
@@ -87,6 +88,7 @@ export default function App() {
             <Route path="/closet/item/:id" element={<ItemDetailScreen />} />
             <Route path="/today" element={<TodayScreen />} />
             <Route path="/looks" element={<LookbookScreen />} />
+            <Route path="/looks/saved" element={<SavedLooksScreen />} />
             <Route path="/trips" element={<TripsScreen />} />
             <Route path="/trips/new" element={<PlanTripScreen />} />
             <Route path="/trips/:id" element={<TripScreen />} />

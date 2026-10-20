@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from app.auth import CurrentUser, get_current_user
 from app.deps import get_db
 from app.ml.outfits import GENERATOR_VERSION, NotEnoughItems, Piece, Weather, generate
-from app.schemas.outfits import GenerateIn, OutfitOut, OutfitPieceOut, WearIn, WearOut, WeatherOut
+from app.schemas.outfits import GenerateIn, OutfitOut, OutfitPieceOut, SaveIn, SaveOut, WearIn, WearOut, WeatherOut
 from app.supabase_rest import Row, SupabaseRest
 from app.weather import DEFAULT_LAT, DEFAULT_LON, DEFAULT_PLACE, current_weather
 
@@ -63,9 +63,17 @@ async def generate_outfit(body: GenerateIn, user: CurrentUser = Depends(get_curr
                           db: SupabaseRest = Depends(get_db)) -> OutfitOut:
     closet = await _closet(db, user.id)
     weather = Weather(body.weather.temp_c, body.weather.feels_c, body.weather.rain_pct) if body.weather else None
+    require = None
+    if body.require_id is not None:
+        require = next((p for p in closet if p.id == body.require_id), None)
+        if require is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, detail="item_not_found")
     try:
-        outfit = generate(closet, occasion=body.occasion, weather=weather, today=_utc_today(),
-                          seed=body.seed, avoid=set(body.avoid_ids), season_name=await _season_name(db, user.id))
+        outfit = generate(closet, occasion=body.occasion, weather=weather, today=_utc_today(), seed=body.seed,
+                          avoid=set(body.avoid_ids) - {body.require_id}, season_name=await _season_name(db, user.id),
+                          require=require)
+    except ValueError:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, detail="cannot_style_category") from None
     except NotEnoughItems as e:
         raise HTTPException(status.HTTP_409_CONFLICT, detail=f"need_items:{','.join(e.missing)}") from None
     return OutfitOut(
@@ -74,27 +82,40 @@ async def generate_outfit(body: GenerateIn, user: CurrentUser = Depends(get_curr
     )
 
 
+async def _record(db: SupabaseRest, user_id: str, body: SaveIn, *, saved: bool) -> tuple[str, list[str]]:
+    """Writes `outfits` + `outfit_items` after checking every piece belongs to the user."""
+    ids = list(dict.fromkeys(body.item_ids))
+    owned = await db.select("closet_items", {"id": f"in.({','.join(ids)})", "user_id": f"eq.{user_id}", "select": "id,category"})
+    if len(owned) != len(ids):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="item_not_found")
+    outfit = await db.insert("outfits", {
+        "user_id": user_id, "occasion": body.occasion, "reason": body.reason, "generator_v": body.generator_v,
+        "weather_ctx": body.weather.model_dump() if body.weather else None, "saved": saved,
+    })
+    await db.insert_many("outfit_items", [{"outfit_id": outfit["id"], "item_id": r["id"], "slot": r["category"]} for r in owned])
+    return outfit["id"], ids
+
+
+@router.post("/outfits/save", response_model=SaveOut)
+async def save_outfit(body: SaveIn, user: CurrentUser = Depends(get_current_user),
+                      db: SupabaseRest = Depends(get_db)) -> SaveOut:
+    """Keeps a look in Saved looks without logging a wear."""
+    outfit_id, _ = await _record(db, user.id, body, saved=True)
+    return SaveOut(outfit_id=outfit_id)
+
+
 @router.post("/outfits/wear", response_model=WearOut)
 async def wear_outfit(body: WearIn, user: CurrentUser = Depends(get_current_user),
                       db: SupabaseRest = Depends(get_db)) -> WearOut:
     """Records the outfit and logs a wear for each piece (one per item per day, duplicates skipped)."""
     _check_local_date(body.worn_on)
-    ids = list(dict.fromkeys(body.item_ids))
-    owned = await db.select("closet_items", {"id": f"in.({','.join(ids)})", "user_id": f"eq.{user.id}", "select": "id,category"})
-    if len(owned) != len(ids):
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="item_not_found")
-
-    outfit = await db.insert("outfits", {
-        "user_id": user.id, "occasion": body.occasion, "reason": body.reason, "generator_v": body.generator_v,
-        "weather_ctx": body.weather.model_dump() if body.weather else None, "saved": True,
-    })
-    await db.insert_many("outfit_items", [{"outfit_id": outfit["id"], "item_id": r["id"], "slot": r["category"]} for r in owned])
+    outfit_id, ids = await _record(db, user.id, body, saved=False)
     logged = await db.insert_many(
         "wear_log",
-        [{"user_id": user.id, "item_id": i, "outfit_id": outfit["id"], "worn_on": body.worn_on.isoformat()} for i in ids],
+        [{"user_id": user.id, "item_id": i, "outfit_id": outfit_id, "worn_on": body.worn_on.isoformat()} for i in ids],
         ignore_conflicts_on="user_id,item_id,worn_on",
     )
-    return WearOut(outfit_id=outfit["id"], newly_logged=len(logged))
+    return WearOut(outfit_id=outfit_id, newly_logged=len(logged))
 
 
 @router.get("/weather", response_model=WeatherOut)

@@ -33,6 +33,8 @@ class GenerateIn(BaseModel):
     seed: int = Field(default=0, ge=0, le=2**31)
     # The outfit just shown, so the next one moves away from it.
     avoid_ids: Annotated[list[str], Field(max_length=10)] = []
+    # "Style this piece": build the outfit around this closet item.
+    require_id: str | None = Field(default=None, max_length=64)
 
 
 class OutfitPieceOut(BaseModel):
@@ -50,7 +52,7 @@ class OutfitOut(BaseModel):
     generator_v: str
 
 
-class WearIn(BaseModel):
+class SaveIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     item_ids: Annotated[list[str], Field(min_length=1, max_length=8)]
@@ -58,6 +60,13 @@ class WearIn(BaseModel):
     weather: WeatherIn | None = None
     reason: str = Field(min_length=1, max_length=500)
     generator_v: str = Field(min_length=1, max_length=40)
+
+
+class SaveOut(BaseModel):
+    outfit_id: str
+
+
+class WearIn(SaveIn):
     # The user's local calendar date (the server runs on UTC).
     worn_on: date
 

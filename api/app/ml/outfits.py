@@ -152,11 +152,20 @@ def coherence(pieces: list[Piece]) -> float:
     return 3 * (float(np.mean(sims)) - 0.6)
 
 
-def _search(by_cat: dict[str, list[Piece]], scores: dict[str, float]) -> tuple[list[Piece], float]:
+STYLABLE = {"top", "bottom", "dress", "shoes", "outerwear", "bag"}
+
+
+def _search(by_cat: dict[str, list[Piece]], scores: dict[str, float],
+            require: Piece | None = None) -> tuple[list[Piece], float]:
+    req = require.category if require is not None else None
+
     def top(cat: str, k: int) -> list[Piece]:
+        if require is not None and req == cat:
+            return [require]  # "style this piece": the slot is fixed
         return sorted(by_cat.get(cat, []), key=lambda p: -scores[p.id])[:k]
 
-    bases = [[t, b] for t, b in product(top("top", 4), top("bottom", 4))] + [[d] for d in top("dress", 4)]
+    pairs = [[t, b] for t, b in product(top("top", 4), top("bottom", 4))]
+    bases = pairs if req in ("top", "bottom") else [[require]] if req == "dress" else pairs + [[d] for d in top("dress", 4)]
     if not bases:
         missing = ["dress or a top and a bottom"]
         if by_cat.get("top") and not by_cat.get("bottom"):
@@ -165,8 +174,8 @@ def _search(by_cat: dict[str, list[Piece]], scores: dict[str, float]) -> tuple[l
             missing = ["top"]
         raise NotEnoughItems(missing)
     shoes = top("shoes", 3) or [None]  # shoes are required when you own any
-    outer = [p for p in top("outerwear", 2) if scores[p.id] > 0.3] + [None]
-    bags = [p for p in top("bag", 1) if scores[p.id] > 0.3] + [None]
+    outer = top("outerwear", 1) if req == "outerwear" else [p for p in top("outerwear", 2) if scores[p.id] > 0.3] + [None]
+    bags = top("bag", 1) if req == "bag" else [p for p in top("bag", 1) if scores[p.id] > 0.3] + [None]
 
     best: tuple[list[Piece], float] = ([], -math.inf)
     for base, sh, ow, bag in product(bases, shoes, outer, bags):
@@ -179,7 +188,10 @@ def _search(by_cat: dict[str, list[Piece]], scores: dict[str, float]) -> tuple[l
 
 def generate(closet: list[Piece], *, occasion: str | None, weather: Weather | None, today: date,
              seed: int = 0, avoid: set[str] | None = None, season_name: str | None = None,
-             prefer: set[str] | None = None) -> Outfit:
+             prefer: set[str] | None = None, require: Piece | None = None) -> Outfit:
+    """`require`: build the outfit around this piece (must be in `closet`, a category in STYLABLE)."""
+    if require is not None and require.category not in STYLABLE:
+        raise ValueError(f"can't build an outfit around a {require.category}")
     avoid = avoid or set()
     prefer = prefer or set()
     vecs = occasion_vectors()
@@ -190,16 +202,16 @@ def generate(closet: list[Piece], *, occasion: str | None, weather: Weather | No
     # Same jitter for both runs so the weather comparison below is like-for-like.
     jitter = {p.id: float(j) for p, j in zip(closet, np.random.default_rng(seed).gumbel(0, 0.6, len(closet)))}
     scores = {p.id: piece_score(p, occasion, weather, today, avoid, vecs, prefer) + jitter[p.id] for p in closet}
-    pieces, total = _search(by_cat, scores)
+    pieces, total = _search(by_cat, scores, require)
 
     note = None
     if weather is not None:
         dry = {p.id: piece_score(p, occasion, None, today, avoid, vecs, prefer) + jitter[p.id] for p in closet}
-        note = _swap_note(_search(by_cat, dry)[0], pieces, weather)
+        note = _swap_note(_search(by_cat, dry, require)[0], pieces, weather)
 
     # Only claim "polished enough for work" when the chosen pieces actually lean that way.
     fits = occasion is not None and float(np.mean([_occasion_fit(p, occasion, vecs) for p in pieces])) > 0
-    reason, tags = explain(pieces, occasion, weather, season_name, occasion_fits=fits)
+    reason, tags = explain(pieces, occasion, weather, season_name, occasion_fits=fits, around=require)
     return Outfit(pieces, round(total, 3), reason, tags, note)
 
 
@@ -216,8 +228,8 @@ def _swap_note(without: list[Piece], chosen: list[Piece], w: Weather) -> str | N
 # ---------- explanation (hard rule 7) ----------
 
 def explain(pieces: list[Piece], occasion: str | None, w: Weather | None, season_name: str | None,
-            occasion_fits: bool = True) -> tuple[str, list[str]]:
-    phrases: list[str] = []
+            occasion_fits: bool = True, around: Piece | None = None) -> tuple[str, list[str]]:
+    phrases: list[str] = [f"built around your {around.name.lower()}"] if around is not None else []
     tags: list[str] = []
     hot = w is not None and w.feels_c >= HOT_FEELS_C
     closed = any(p.category == "shoes" and p.subcategory in CLOSED_SHOES for p in pieces)
@@ -248,7 +260,7 @@ def explain(pieces: list[Piece], occasion: str | None, w: Weather | None, season
     elif harmony(pieces) > 0:
         phrases.append("tonal colors that sit softly together")
 
-    unworn = next((p for p in pieces if p.wear_count == 0), None)
+    unworn = next((p for p in pieces if p.wear_count == 0 and p is not around), None)
     if unworn is not None:
         phrases.append(f"a first outing for the {unworn.name.lower()}")
 

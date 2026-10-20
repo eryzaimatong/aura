@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ApiError, generateOutfit, wearOutfit, type GeneratedOutfit, type Occasion, type WeatherNow } from '../../lib/api';
+import { ApiError, generateOutfit, saveOutfit, wearOutfit, type GeneratedOutfit, type Occasion, type WeatherNow } from '../../lib/api';
 import { apiErrorMessage } from '../../lib/apiErrors';
 import { track } from '../../lib/analytics';
 import { useProfile } from '../../lib/auth/context';
@@ -15,20 +15,21 @@ export type OutfitState =
  * One generated outfit at a time. `weather === undefined` means "still loading, wait";
  * `null` means generate without weather.
  */
-export function useOutfit(occasion: Occasion | null, weather: WeatherNow | null | undefined, { trackGenerated = true } = {}) {
+export function useOutfit(occasion: Occasion | null, weather: WeatherNow | null | undefined,
+  { trackGenerated = true, requireId = null }: { trackGenerated?: boolean; requireId?: string | null } = {}) {
   const profile = useProfile();
   const [seed, setSeed] = useState(0);
   const [avoid, setAvoid] = useState<string[]>([]);
   const [state, setState] = useState<OutfitState>({ status: 'loading' });
 
   const w = weather ? { temp_c: weather.temp_c, feels_c: weather.feels_c, rain_pct: weather.rain_pct } : null;
-  const key = JSON.stringify([occasion, w, seed, avoid]);
+  const key = JSON.stringify([occasion, w, seed, avoid, requireId]);
 
   useEffect(() => {
     if (weather === undefined) return;
     let cancelled = false;
     setState({ status: 'loading' });
-    generateOutfit({ occasion, weather: w, seed, avoid_ids: avoid })
+    generateOutfit({ occasion, weather: w, seed, avoid_ids: avoid, require_id: requireId })
       .then((outfit) => {
         if (cancelled) return;
         setState({ status: 'ready', outfit });
@@ -65,5 +66,14 @@ export function useOutfit(occasion: Occasion | null, weather: WeatherNow | null 
     return res;
   }, [state, occasion, w, profile]);
 
-  return { state, shuffle, wear };
+  /** Keeps the outfit on screen in Saved looks. */
+  const save = useCallback(async () => {
+    if (state.status !== 'ready') return null;
+    const { outfit } = state;
+    return saveOutfit({
+      item_ids: outfit.pieces.map((p) => p.id), occasion, weather: w, reason: outfit.reason, generator_v: outfit.generator_v,
+    });
+  }, [state, occasion, w]);
+
+  return { state, shuffle, wear, save };
 }

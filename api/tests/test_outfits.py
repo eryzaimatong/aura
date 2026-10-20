@@ -184,3 +184,46 @@ def test_wear_rejects_far_dates_and_foreign_items(client):
     today = outfits_router._utc_today().isoformat()
     assert c.post("/api/outfits/wear", json={**base, "item_ids": ["not_mine"], "worn_on": today}).status_code == 404
     assert c.post("/api/outfits/wear", json={**base, "reason": "", "worn_on": today}).status_code == 422
+
+
+# ---------- style this piece / save ----------
+
+@pytest.mark.parametrize("pid", ["sage_skirt", "tan_sandals", "navy_sweater"])
+def test_require_builds_around_the_piece(pid):
+    closet = basic_closet() + [piece("denim_jacket", "outerwear", "jacket")]
+    req = next(p for p in closet if p.id == pid)
+    for s in range(5):
+        o = generate(closet, occasion=None, weather=None, today=TODAY, seed=s, require=req)
+        assert pid in {p.id for p in o.pieces}
+        assert o.reason.startswith(f"Built around your {req.name.lower()}")
+
+
+def test_require_outerwear_and_dress():
+    closet = basic_closet() + [piece("denim_jacket", "outerwear", "jacket"), piece("slip_dress", "dress", "dress")]
+    for pid in ("denim_jacket", "slip_dress"):
+        req = next(p for p in closet if p.id == pid)
+        assert pid in {p.id for p in generate(closet, occasion=None, weather=None, today=TODAY, require=req).pieces}
+
+
+def test_require_rejects_accessories_and_reports_gaps():
+    belt = piece("belt", "accessory")
+    with pytest.raises(ValueError):
+        generate(basic_closet() + [belt], occasion=None, weather=None, today=TODAY, require=belt)
+    tee = piece("tee", "top")
+    with pytest.raises(NotEnoughItems):
+        generate([tee], occasion=None, weather=None, today=TODAY, require=tee)
+
+
+def test_generate_endpoint_require(client):
+    c, _ = client(basic_closet())
+    body = c.post("/api/outfits/generate", json={"require_id": "sage_skirt", "avoid_ids": ["sage_skirt"]}).json()
+    assert "sage_skirt" in {p["id"] for p in body["pieces"]}
+    assert c.post("/api/outfits/generate", json={"require_id": "nope"}).status_code == 404
+
+
+def test_save_records_without_wear_log(client):
+    c, db = client(basic_closet())
+    res = c.post("/api/outfits/save", json={"item_ids": ["cream_tee", "navy_trousers"], "reason": "Because.", "generator_v": "g"})
+    assert res.status_code == 200, res.text
+    assert db.inserted["outfits"][0]["saved"] is True and "wear_log" not in db.inserted
+    assert len(db.inserted["outfit_items"]) == 2

@@ -89,6 +89,11 @@ export function ItemDetailScreen() {
         <Stat value={item.lastWorn ? shortDate(item.lastWorn) : '—'} label="last worn" />
         <Stat value={rank ? ordinal(rank) : '—'} label="most worn" />
       </dl>
+      {item.category !== 'accessory' && (
+        <Button variant="outline" fullWidth className="mt-4" onClick={() => navigate(`/looks?item=${item.id}`)}>
+          Style this piece
+        </Button>
+      )}
       {note && <p role="status" className="mt-3 text-center text-label text-success">{note}</p>}
       {error && <div className="mt-3"><FormAlert message={error} /></div>}
 
