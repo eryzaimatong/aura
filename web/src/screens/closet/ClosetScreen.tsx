@@ -16,6 +16,7 @@ import { ItemPhoto } from './ItemPhoto';
 import { useCloset } from './useCloset';
 
 type Filter = 'all' | 'palette' | ItemCategory;
+const NO_ITEMS: ClosetItem[] = [];
 type Sort = 'newest' | 'most' | 'least' | 'idle';
 
 const SORTS: Record<Sort, { label: string; cmp: (a: ClosetItem, b: ClosetItem) => number }> = {
@@ -33,7 +34,7 @@ export function ClosetScreen() {
   const [filter, setFilter] = useState<Filter>('all');
   const [sort, setSort] = useState<Sort>('newest');
 
-  const items = state.status === 'ready' ? state.items : [];
+  const items = state.status === 'ready' ? state.items : NO_ITEMS;
   const present = useMemo(() => CATEGORIES.filter((c) => items.some((i) => i.category === c)), [items]);
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase();

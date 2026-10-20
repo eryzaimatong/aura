@@ -35,7 +35,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [userId, attempt]); // deliberately not `session`: token refreshes replace the object
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- deliberately not `session`: token refreshes replace the object
+  }, [userId, attempt]);
 
   const signOut = useCallback(async () => {
     await clearReminder();

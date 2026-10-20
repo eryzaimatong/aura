@@ -16,7 +16,8 @@
     "android:icons": "capacitor-assets generate --android --assetPath resources --iconBackgroundColor \"#FDF6EC\" --splashBackgroundColor \"#FDF6EC\"",
     "android:apk": "node scripts/android-gradle.mjs assembleDebug --console=plain",
     "android:bundle": "npm run android:sync && node scripts/android-gradle.mjs bundleRelease --console=plain",
-    "test": "vitest run"
+    "test": "vitest run",
+    "lint": "oxlint --deny-warnings"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.3",
@@ -45,6 +46,7 @@
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^6.1.2",
+    "oxlint": "1.86.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
     "vite": "^8.3.4",

@@ -103,7 +103,7 @@ export const QUIZ_CONFIDENCE = 0.4;
  * the four axes, zero-padded. Layout is versioned so learned signals can extend it later.
  */
 export function printVector(answers: number[], axes: Axes): number[] {
-  const v = new Array<number>(64).fill(0);
+  const v = Array.from({ length: 64 }, () => 0);
   answers.forEach((a, qi) => { v[qi * 4 + a] = 1; });
   AXES.forEach(({ key }, i) => { v[32 + i] = axes[key]; });
   return v;

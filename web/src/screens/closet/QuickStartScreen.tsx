@@ -54,7 +54,7 @@ export function QuickStartScreen() {
         setTiles((ts) => [...ts]); // nudge the effect to pick up the next photo
       }
     })();
-  }, [tiles, profile.id]);
+  }, [tiles, profile]);
 
   const added = (existing ?? 0) + tiles.filter((t) => t.status === 'saved').length;
   const left = Math.max(0, GOAL - added);

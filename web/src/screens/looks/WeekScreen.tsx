@@ -53,7 +53,7 @@ export function WeekScreen() {
     let cancelled = false;
     setState({ status: 'loading' });
     const coords = savedCoords();
-    planWeek({ start: localToday(), ...prefs, ...(coords ?? {}) })
+    planWeek({ start: localToday(), ...prefs, ...coords })
       .then((plan) => !cancelled && setState({ status: 'ready', plan }))
       .catch((err: unknown) => {
         if (cancelled) return;

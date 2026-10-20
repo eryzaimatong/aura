@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ApiError, generateOutfit, saveOutfit, wearOutfit, type GeneratedOutfit, type Occasion, type WeatherNow } from '../../lib/api';
 import { apiErrorMessage } from '../../lib/apiErrors';
 import { track } from '../../lib/analytics';
@@ -22,7 +22,7 @@ export function useOutfit(occasion: Occasion | null, weather: WeatherNow | null 
   const [avoid, setAvoid] = useState<string[]>([]);
   const [state, setState] = useState<OutfitState>({ status: 'loading' });
 
-  const w = weather ? { temp_c: weather.temp_c, feels_c: weather.feels_c, rain_pct: weather.rain_pct } : null;
+  const w = useMemo(() => (weather ? { temp_c: weather.temp_c, feels_c: weather.feels_c, rain_pct: weather.rain_pct } : null), [weather]);
   const key = JSON.stringify([occasion, w, seed, avoid, requireId]);
 
   useEffect(() => {
