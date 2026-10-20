@@ -1,0 +1,19 @@
+target-version = "py311"
+line-length = 130
+
+[lint]
+# pyflakes/pycodestyle, bugbear, pyupgrade, bandit (security), async pitfalls
+select = ["E", "F", "W", "B", "UP", "S", "ASYNC"]
+ignore = [
+  "E501",  # long lines: formatting, not bugs
+  "E741",  # `l` for LAB lightness is the domain name
+  "B008",  # FastAPI's Depends() in defaults is the documented pattern
+  "B905",  # zip() over arrays we build to equal length
+  "S101",  # asserts are fine in this codebase's tests and invariants
+  "S311",  # random is for outfit jitter, not security
+  "S310",  # urlopen only on hard-coded https model URLs (download_models)
+]
+
+[lint.per-file-ignores]
+# Fake tokens, pytest fixtures shared by import, small test helpers.
+"tests/*" = ["S105", "S106", "F811", "B006"]

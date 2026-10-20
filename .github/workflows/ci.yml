@@ -30,7 +30,7 @@ jobs:
       - run: npm run build
 
   api:
-    name: API · tests
+    name: API · lint + tests
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -43,4 +43,5 @@ jobs:
           cache: pip
           cache-dependency-path: api/requirements*.txt
       - run: pip install -r requirements-dev.txt
+      - run: ruff check app tests
       - run: pytest -q

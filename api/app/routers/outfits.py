@@ -1,5 +1,5 @@
 import json
-from datetime import date, datetime, timezone
+from datetime import date, datetime, UTC
 
 import httpx
 import numpy as np
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/api", tags=["outfits"])
 
 
 def _utc_today() -> date:
-    return datetime.now(timezone.utc).date()
+    return datetime.now(UTC).date()
 
 
 def _check_local_date(d: date) -> None:
