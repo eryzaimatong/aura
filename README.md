@@ -81,7 +81,8 @@ The full rule set is in [`AURA-BRIEF.md`](AURA-BRIEF.md#3-hard-rules).
 1. In the **SQL Editor**, run the files in `db/` **in order**:
    `000_schema.sql` → `001_rls_hardening.sql` → `002_wear_log_ownership.sql` → `003_table_grants.sql`
    → `004_closet_storage.sql` → `005_delete_my_data.sql` → `006_recommendation_grants.sql`
-   → `007_saved_looks.sql` → `008_delete_derived_advice.sql`. Migrations 001–008 are safe to re-run.
+   → `007_saved_looks.sql` → `008_delete_derived_advice.sql` → `009_profile_column_grants.sql`.
+   Migrations 001–009 are safe to re-run.
 2. Under **Authentication → URL Configuration**:
    - Set **Site URL** to `http://localhost:5173`.
    - Add `http://localhost:5173/**` to **Redirect URLs**.
@@ -139,11 +140,11 @@ component state). Neither ships in production builds.
 ## Testing
 
 ```bash
-# API: classifier rules + endpoints against a fake database
-cd api && pytest
+# API: lint (bugbear + bandit security rules), then classifier rules + endpoints against a fake database
+cd api && ruff check app tests && pytest
 
-# Web: unit tests (Vitest)
-cd web && npm test
+# Web: lint (oxlint: correctness + React hook rules), then unit tests (Vitest)
+cd web && npm run lint && npm test
 
 # Web: type check and production build
 cd web && npm run typecheck && npm run build
