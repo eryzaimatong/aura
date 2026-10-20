@@ -1,5 +1,6 @@
 import type { AuraCardRow, ColorSeason, FaceShape, ItemCategory, Seasonality, Undertone } from './database.types';
 import type { ScanMeasurements } from './face/analyze';
+import { invalidateCloset } from './closet/cache';
 import { deviceHint } from './native';
 import { supabase } from './supabase';
 
@@ -175,8 +176,10 @@ export interface WearRequest {
   worn_on: string;
 }
 
-export function wearOutfit(body: WearRequest): Promise<{ outfit_id: string; newly_logged: number }> {
-  return request('/api/outfits/wear', { method: 'POST', auth: true, body: JSON.stringify(body) });
+export async function wearOutfit(body: WearRequest): Promise<{ outfit_id: string; newly_logged: number }> {
+  const res = await request<{ outfit_id: string; newly_logged: number }>('/api/outfits/wear', { method: 'POST', auth: true, body: JSON.stringify(body) });
+  invalidateCloset(); // new wear_log rows
+  return res;
 }
 
 export function postUndertoneQuiz(answers: UndertoneAnswers): Promise<AuraCard> {

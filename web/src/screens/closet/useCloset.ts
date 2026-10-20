@@ -1,34 +1,36 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useSyncExternalStore } from 'react';
 import { useProfile } from '../../lib/auth/context';
 import { authErrorMessage } from '../../lib/authErrors';
-import { listItems, signedUrls, wearLog, type ClosetItem } from '../../lib/closet/data';
-import type { WearLogRow } from '../../lib/database.types';
+import { ensureFresh, invalidateCloset, snapshot, subscribe, type ClosetState } from '../../lib/closet/cache';
 
-export type ClosetState =
-  | { status: 'loading' }
-  | { status: 'error'; message: string }
-  | { status: 'ready'; items: ClosetItem[]; urls: Map<string, string>; log: Pick<WearLogRow, 'item_id' | 'worn_on'>[] };
+export type { ClosetState };
 
-/** The user's closet with photo links and the wear log. `reload` after any change. */
+// How often an open screen checks whether photo links need renewing.
+const CHECK_EVERY_MS = 5 * 60_000;
+
+/** The user's closet with photo links and the wear log, shared across screens. `reload` after any change. */
 export function useCloset() {
   const profile = useProfile();
-  const [state, setState] = useState<ClosetState>({ status: 'loading' });
-  const [attempt, setAttempt] = useState(0);
+  const userId = profile.id;
+  const state = useSyncExternalStore(subscribe, () => snapshot(userId));
 
   useEffect(() => {
-    let cancelled = false;
-    (async (): Promise<ClosetState> => {
-      const [items, log] = await Promise.all([listItems(profile.id), wearLog(profile.id)]);
-      const urls = await signedUrls(items.map((i) => i.image_path));
-      return { status: 'ready', items, urls, log };
-    })()
-      .then((s) => !cancelled && setState(s))
-      .catch((err: unknown) => !cancelled && setState({ status: 'error', message: authErrorMessage(err) }));
+    const check = () => void ensureFresh(userId, authErrorMessage);
+    check();
+    const timer = window.setInterval(check, CHECK_EVERY_MS);
+    // Back from the background (or the phone waking up): links may have expired meanwhile.
+    const onVisible = () => document.visibilityState === 'visible' && check();
+    document.addEventListener('visibilitychange', onVisible);
     return () => {
-      cancelled = true;
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', onVisible);
     };
-  }, [profile.id, attempt]);
+  }, [userId]);
 
-  const reload = useCallback(() => setAttempt((n) => n + 1), []);
+  const reload = useCallback(() => {
+    invalidateCloset();
+    void ensureFresh(userId, authErrorMessage, true);
+  }, [userId]);
+
   return { state, reload };
 }

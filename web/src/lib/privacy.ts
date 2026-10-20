@@ -5,6 +5,8 @@
 import type { DeleteScope } from './database.types';
 import { localToday } from './closet/data';
 import { POLICY_VERSION } from './policy';
+import { clearClosetCache } from './closet/cache';
+import { clearReminder } from './reminders';
 import { supabase } from './supabase';
 
 const BUCKET = 'closet';
@@ -124,7 +126,11 @@ export async function deleteMyData(userId: string, scope: DeleteScope): Promise<
   if (scope === 'closet' || scope === 'all') await removeClosetPhotos(userId);
   const { error } = await supabase.rpc('delete_my_data', { scope });
   if (error) throw error;
-  if (scope === 'all') await supabase.auth.signOut({ scope: 'local' });
+  if (scope === 'closet' || scope === 'all') clearClosetCache();
+  if (scope === 'all') {
+    await clearReminder();
+    await supabase.auth.signOut({ scope: 'local' });
+  }
 }
 
 export function formatBytes(n: number): string {

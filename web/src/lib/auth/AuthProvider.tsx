@@ -4,6 +4,7 @@ import { authErrorMessage } from '../authErrors';
 import type { ProfileRow } from '../database.types';
 import { ensureProfile } from '../profile';
 import { supabase } from '../supabase';
+import { clearClosetCache } from '../closet/cache';
 import { clearReminder } from '../reminders';
 import { AuthContext, type AuthContextValue, type AuthState, type ProfilePatch } from './context';
 
@@ -38,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async () => {
     await clearReminder();
+    clearClosetCache();
     await supabase.auth.signOut();
     setResult(null);
   }, []);

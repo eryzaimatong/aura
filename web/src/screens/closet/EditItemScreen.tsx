@@ -18,7 +18,7 @@ import { useCloset } from './useCloset';
 export function EditItemScreen() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { state } = useCloset();
+  const { state, reload } = useCloset();
   const item = state.status === 'ready' ? state.items.find((i) => i.id === id) : undefined;
   const [name, setName] = useState('');
   const [category, setCategory] = useState<ItemCategory>('top');
@@ -49,6 +49,7 @@ export function EditItemScreen() {
     }).eq('id', item!.id);
     setSaving(false);
     if (err) return setError(authErrorMessage(err));
+    reload();
     navigate(`/closet/item/${item!.id}`, { replace: true });
   }
 

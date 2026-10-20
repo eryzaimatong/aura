@@ -1,5 +1,6 @@
 import type { ClosetItemInsert, ClosetItemRow, WearLogRow } from '../database.types';
 import { supabase } from '../supabase';
+import { invalidateCloset } from './cache';
 
 const BUCKET = 'closet';
 const SIGNED_URL_TTL_S = 60 * 60;
@@ -53,6 +54,7 @@ export async function saveItem(userId: string, image: Blob, item: NewItem): Prom
     await supabase.storage.from(BUCKET).remove([path]); // don't leave an orphaned photo
     throw error;
   }
+  invalidateCloset();
   return data;
 }
 
@@ -60,6 +62,7 @@ export async function saveItem(userId: string, image: Blob, item: NewItem): Prom
 export async function deleteItem(item: Pick<ClosetItemRow, 'id' | 'image_path'>): Promise<void> {
   const { error } = await supabase.from('closet_items').delete().eq('id', item.id);
   if (error) throw error;
+  invalidateCloset();
   const removed = await supabase.storage.from(BUCKET).remove([item.image_path]);
   if (removed.error) console.warn('photo not removed', removed.error);
 }
@@ -77,6 +80,7 @@ export async function logWearToday(userId: string, itemId: string): Promise<bool
   const { error } = await supabase.from('wear_log').insert({ user_id: userId, item_id: itemId, worn_on: localToday() });
   if (error?.code === '23505') return false;
   if (error) throw error;
+  invalidateCloset();
   return true;
 }
 
