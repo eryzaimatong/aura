@@ -25,6 +25,7 @@ import { DiaryScreen } from './screens/diary/DiaryScreen';
 import { ShareCardScreen } from './screens/mirror/card/ShareCardScreen';
 import { HistoryScreen } from './screens/diary/HistoryScreen';
 import { EditItemScreen } from './screens/closet/EditItemScreen';
+import { ReminderScreen } from './screens/account/ReminderScreen';
 import { LookbookScreen } from './screens/looks/LookbookScreen';
 import { SavedLooksScreen } from './screens/looks/SavedLooksScreen';
 import { PlanTripScreen } from './screens/trips/PlanTripScreen';
@@ -108,6 +109,7 @@ export default function App() {
             <Route path="/profile/roadmap" element={<RoadmapScreen />} />
             <Route path="/profile/roadmap/add" element={<AddGoalScreen />} />
             <Route path="/settings" element={<SettingsScreen />} />
+            <Route path="/settings/notifications" element={<ReminderScreen />} />
             <Route path="/privacy/data" element={<DataPrivacyScreen />} />
             <Route path="/account/password" element={<ResetPasswordScreen />} />
           </Route>

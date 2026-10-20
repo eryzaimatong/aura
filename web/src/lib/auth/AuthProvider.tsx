@@ -4,6 +4,7 @@ import { authErrorMessage } from '../authErrors';
 import type { ProfileRow } from '../database.types';
 import { ensureProfile } from '../profile';
 import { supabase } from '../supabase';
+import { clearReminder } from '../reminders';
 import { AuthContext, type AuthContextValue, type AuthState, type ProfilePatch } from './context';
 
 type ProfileResult = { userId: string; profile: ProfileRow } | { userId: string; error: string };
@@ -36,6 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [userId, attempt]); // deliberately not `session`: token refreshes replace the object
 
   const signOut = useCallback(async () => {
+    await clearReminder();
     await supabase.auth.signOut();
     setResult(null);
   }, []);

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <!-- allowBackup off: the sign-in session lives in app storage and shouldn't be copied
          into cloud backups (personal data under the Data Privacy Act). -->
     <application
@@ -45,6 +46,8 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Reminders are a gentle morning nudge: inexact alarms are fine, and Play restricts exact ones. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" tools:node="remove" />
     <!-- Selfie preview in the web view (getUserMedia). Frames stay in memory; nothing is saved. -->
     <uses-permission android:name="android.permission.CAMERA" />
     <!-- Opt-in "Use my location" for the weather card; coarse only (~3 km), never stored. -->

@@ -10,6 +10,7 @@ import { authErrorMessage } from '../../lib/authErrors';
 import { hasCurrentConsent, recordConsent } from '../../lib/consent';
 import { FormAlert } from '../onboarding/FormAlert';
 import { NameEditor } from './NameEditor';
+import { formatTime, loadReminder } from '../../lib/reminders';
 
 export function SettingsScreen() {
   const navigate = useNavigate();
@@ -20,6 +21,8 @@ export function SettingsScreen() {
   const [faceScans, setFaceScans] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const reminder = loadReminder();
+  const reminderLabel = reminder ? `Daily at ${formatTime(reminder)}` : 'Off';
 
   useEffect(() => {
     hasCurrentConsent(profile.id, 'face_scan').then(setFaceScans).catch(() => setFaceScans(null));
@@ -73,7 +76,7 @@ export function SettingsScreen() {
           <ListRow label="Region" value="Philippines" />
           <ListRow label="Units" value={profile.units === 'in' ? 'inches' : 'cm'}
             onClick={() => void run(() => updateProfile({ units: profile.units === 'in' ? 'cm' : 'in' }))} />
-          <ListRow label="Notifications" soon />
+          <ListRow label="Notifications" value={reminderLabel} onClick={() => navigate('/settings/notifications')} />
           <ListRow label="Help improve Mira" hint="Share anonymous usage and accuracy feedback"
             control={<Toggle label="Help improve Mira" checked={profile.share_analytics} disabled={busy}
               onChange={(on) => void setAnalytics(on)} />} />
