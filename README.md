@@ -81,7 +81,7 @@ The full rule set is in [`AURA-BRIEF.md`](AURA-BRIEF.md#3-hard-rules).
 1. In the **SQL Editor**, run the files in `db/` **in order**:
    `000_schema.sql` → `001_rls_hardening.sql` → `002_wear_log_ownership.sql` → `003_table_grants.sql`
    → `004_closet_storage.sql` → `005_delete_my_data.sql` → `006_recommendation_grants.sql`
-   → `007_saved_looks.sql`. Migrations 001–007 are safe to re-run.
+   → `007_saved_looks.sql` → `008_delete_derived_advice.sql`. Migrations 001–008 are safe to re-run.
 2. Under **Authentication → URL Configuration**:
    - Set **Site URL** to `http://localhost:5173`.
    - Add `http://localhost:5173/**` to **Redirect URLs**.
@@ -266,7 +266,11 @@ AURA tokens work. Utility names are short aliases: `rounded-md` is **20px**, and
 | Build command | `pip install -r requirements.txt && python -m app.ml.download_models` |
 | Start command | `uvicorn app.main:app --host 0.0.0.0 --port $PORT` |
 | Python version | from `api/.python-version` (3.11) |
-| Environment | `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `CORS_ORIGINS` |
+| Environment | `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `CORS_ORIGINS` (leave `EXPOSE_DOCS` unset: docs stay off) |
+
+The API rate-limits the heavy endpoints per user, in memory: tagging 40, outfit generation 120
+and trip/week plans 30 per 10 minutes. That suits a single instance; use Redis if it scales out.
+Locally, `EXPOSE_DOCS=true` in `api/.env` turns on `/docs`.
 
 ## Android app (Capacitor)
 
@@ -286,6 +290,18 @@ Also create `web/android/local.properties` with `sdk.dir=…` pointing at your A
 | `npm run android:open` | Opens the project in Android Studio. Press ▶ Run to install on the emulator or a phone. |
 | `npm run android:apk` | Builds a debug APK from the command line → `web/android/app/build/outputs/apk/debug/app-debug.apk`. |
 | `npm run android:icons` | Regenerates launcher icons and splash screens from `web/resources/`. |
+| `npm run android:bundle` | Production web build, sync, then a **signed release bundle** for Google Play → `web/android/app/build/outputs/bundle/release/app-release.aab`. |
+
+**Releasing to Google Play:**
+1. Create the upload key once (keep it and its passwords somewhere safe; losing it blocks updates):
+   `keytool -genkeypair -v -keystore web/android/aura-upload.jks -alias aura -keyalg RSA -keysize 2048 -validity 10000`
+2. Copy `web/android/keystore.properties.example` to `keystore.properties` and fill in the passwords.
+   Both files are gitignored.
+3. Bump `"version"` in `web/package.json` for every upload: it sets `versionName`, and
+   `versionCode` = major·10000 + minor·100 + patch (e.g. 1.2.3 → 10203).
+4. `npm run android:bundle`, then upload the `.aab` in the Play Console.
+
+Release builds shrink the native shell with R8 (`minifyEnabled`, `shrinkResources`).
 
 **Native details:**
 - **Camera:** the selfie uses the web view's `getUserMedia` (frames stay in memory). There's no
