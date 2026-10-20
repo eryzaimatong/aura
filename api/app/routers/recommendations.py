@@ -25,10 +25,17 @@ class RecOut(BaseModel):
 
 @router.post("/refresh", response_model=list[RecOut])
 async def refresh(user: CurrentUser = Depends(get_current_user), db: SupabaseRest = Depends(get_db)) -> list[RecOut]:
-    """Rebuilds Vanity picks from the current Aura Card (old picks and their feedback go with them)."""
+    """
+    Vanity picks for the current Aura Card. Picks already built for this card are returned as they
+    are (so a double tap can't duplicate them or wipe Saves); picks from older cards are replaced.
+    """
     card = await current_card(db, user.id)
+    kinds = f"in.({','.join(VANITY_KINDS)})"
+    existing = await db.select("recommendations", {"user_id": f"eq.{user.id}", "kind": kinds, "payload->>card_id": f"eq.{card['id']}"})
+    if existing:
+        return _out(existing)
     recs = recommend(card)
-    await db.delete("recommendations", {"user_id": f"eq.{user.id}", "kind": f"in.({','.join(VANITY_KINDS)})"})
+    await db.delete("recommendations", {"user_id": f"eq.{user.id}", "kind": kinds})
     rows = await db.insert_many("recommendations", [{
         "user_id": user.id,
         "kind": r.kind,
@@ -37,6 +44,10 @@ async def refresh(user: CurrentUser = Depends(get_current_user), db: SupabaseRes
         "fit_score": r.fit_score,
         "algo_v": ALGO_VERSION,
     } for r in recs])
+    return _out(rows)
+
+
+def _out(rows: list[dict]) -> list[RecOut]:
     out = [RecOut(id=row["id"], kind=row["kind"], key=row["payload"]["key"], title=row["payload"]["title"],
                   reason=row["reason"], fit_score=row["fit_score"], swatches=row["payload"]["swatches"],
                   icon=row["payload"]["icon"]) for row in rows]

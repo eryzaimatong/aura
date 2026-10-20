@@ -57,6 +57,8 @@ class FakeDb:
         self.inserted: list[dict[str, Any]] = []
 
     async def select(self, table: str, params: dict[str, str]) -> list[dict[str, Any]]:
+        if table == "recommendations":
+            return [r for r in self.inserted if params.get("payload->>card_id") == f"eq.{r['payload']['card_id']}"]
         return [self.card] if table == "aura_cards" and self.card else []
 
     async def delete(self, table: str, filters: dict[str, str]) -> None:
@@ -89,3 +91,11 @@ def test_refresh_replaces_vanity_picks(client):
 def test_refresh_without_card_is_404(client):
     c, _ = client(None)
     assert c.post("/api/recommendations/refresh").json()["detail"] == "no_card"
+
+
+def test_second_refresh_for_same_card_reuses_picks(client):
+    c, db = client(CARD)
+    first = c.post("/api/recommendations/refresh").json()
+    second = c.post("/api/recommendations/refresh").json()
+    assert [r["id"] for r in first] == [r["id"] for r in second]
+    assert len(db.deleted) == 1  # nothing wiped the second time, so Saves survive

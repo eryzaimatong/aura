@@ -110,8 +110,8 @@ NEUTRALS: dict[str, tuple[str, list[str], str]] = {
     "neutral": ("Taupe, denim and ivory basics", ["#8B7D72", "#4F6D8F", "#F2EBDD"], "Balanced neutrals suit your in-between undertone"),
 }
 METALS: dict[str, tuple[str, str, str]] = {
-    "warm": ("Gold jewellery", "#C9A64B", "Gold warms your skin's golden undertone"),
-    "cool": ("Silver jewellery", "#C0C0C8", "Silver echoes the cool notes in your skin"),
+    "warm": ("Gold jewelry", "#C9A64B", "Gold warms your skin's golden undertone"),
+    "cool": ("Silver jewelry", "#C0C0C8", "Silver echoes the cool notes in your skin"),
     "neutral": ("Mixed metals", "#C9B37E", "Your neutral undertone carries both gold and silver"),
 }
 

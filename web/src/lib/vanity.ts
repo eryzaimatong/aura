@@ -38,7 +38,10 @@ export async function loadVanity(userId: string, cardId: string): Promise<Vanity
   if (fb.error) throw fb.error;
   const has = (id: string, v: RecVerdict) => fb.data.some((f) => f.rec_id === id && f.verdict === v);
 
+  // If two refreshes ever raced, keep one pick per kind + key.
+  const seen = new Set<string>();
   return recs
+    .filter((r) => { const k = `${r.kind}:${r.key}`; if (seen.has(k)) return false; seen.add(k); return true; })
     // Hard rule 7: no reason, no render.
     .filter((r) => r.reason.trim().length > 0)
     .map((r) => ({ ...r, saved: has(r.id, 'saved'), dismissed: has(r.id, 'dismissed') }))
