@@ -34,6 +34,7 @@ const HistoryScreen = lazy(() => import('./screens/diary/HistoryScreen').then((m
 const ItemDetailScreen = lazy(() => import('./screens/closet/ItemDetailScreen').then((m) => ({ default: m.ItemDetailScreen })));
 const LookbookScreen = lazy(() => import('./screens/looks/LookbookScreen').then((m) => ({ default: m.LookbookScreen })));
 const MeasurementsScreen = lazy(() => import('./screens/account/MeasurementsScreen').then((m) => ({ default: m.MeasurementsScreen })));
+const PackedAwayScreen = lazy(() => import('./screens/closet/PackedAwayScreen').then((m) => ({ default: m.PackedAwayScreen })));
 const PlanTripScreen = lazy(() => import('./screens/trips/PlanTripScreen').then((m) => ({ default: m.PlanTripScreen })));
 const PrivacyNoticeScreen = lazy(() => import('./screens/PrivacyNoticeScreen').then((m) => ({ default: m.PrivacyNoticeScreen })));
 const ProfileScreen = lazy(() => import('./screens/account/ProfileScreen').then((m) => ({ default: m.ProfileScreen })));
@@ -88,6 +89,7 @@ export default function App() {
                 <Route path="/closet" element={<ClosetScreen />} />
                 <Route path="/closet/add" element={<AddItemScreen />} />
                 <Route path="/closet/start" element={<QuickStartScreen />} />
+              <Route path="/closet/packed" element={<PackedAwayScreen />} />
                 <Route path="/closet/item/:id" element={<ItemDetailScreen />} />
                 <Route path="/closet/item/:id/edit" element={<EditItemScreen />} />
                 <Route path="/today" element={<TodayScreen />} />

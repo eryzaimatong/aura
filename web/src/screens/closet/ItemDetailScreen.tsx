@@ -7,7 +7,7 @@ import { ScreenHeader } from '../../components/ScreenHeader';
 import { useProfile } from '../../lib/auth/context';
 import { track } from '../../lib/analytics';
 import { authErrorMessage } from '../../lib/authErrors';
-import { deleteItem, localToday, logWearToday } from '../../lib/closet/data';
+import { deleteItem, localToday, logWearToday, setArchived } from '../../lib/closet/data';
 import { CATEGORY_LABEL, capitalize, SEASONALITY_LABEL, shortDate, SUBCATEGORIES } from '../../lib/closet/labels';
 import { mostWornRank, ordinal, pairsFor } from '../../lib/closet/pairs';
 import { FormAlert } from '../onboarding/FormAlert';
@@ -51,6 +51,17 @@ export function ItemDetailScreen() {
     }
   }
 
+  async function packAway() {
+    setBusy(true);
+    try {
+      await setArchived(item!.id, true);
+      navigate('/closet', { replace: true });
+    } catch (err) {
+      setError(authErrorMessage(err));
+      setBusy(false);
+    }
+  }
+
   async function remove() {
     setBusy(true);
     try {
@@ -69,6 +80,8 @@ export function ItemDetailScreen() {
           <Button fullWidth disabled={busy || wornToday} onClick={() => void wore()}>
             {wornToday ? 'Worn today ✓' : 'I wore this today'}
           </Button>
+          <Button variant="outline" fullWidth disabled={busy} onClick={() => void packAway()}>Pack away</Button>
+          <p className="text-center text-caption text-cocoa-soft">Packed-away pieces leave outfits and counts but keep their history.</p>
           <Button variant={confirmDelete ? 'danger' : 'ghost'} fullWidth disabled={busy}
             onClick={() => (confirmDelete ? void remove() : setConfirmDelete(true))}>
             {confirmDelete ? 'Tap again to delete for good' : 'Remove from closet'}

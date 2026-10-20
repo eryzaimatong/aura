@@ -39,7 +39,8 @@ export function ClosetScreen() {
     const q = query.trim().toLowerCase();
     return items.filter((i) =>
       (filter === 'all' || (filter === 'palette' ? i.in_palette === true : i.category === filter)) &&
-      (!q || i.name.toLowerCase().includes(q) || (i.subcategory ?? '').includes(q))).sort(SORTS[sort].cmp);
+      (!q || i.name.toLowerCase().includes(q) || (i.subcategory ?? '').includes(q)
+        || i.dominant_colors.some((c) => c.name?.toLowerCase().includes(q)))).sort(SORTS[sort].cmp);
   }, [items, filter, query, sort]);
 
   return (
@@ -84,7 +85,7 @@ export function ClosetScreen() {
               </p>
             );
           })()}
-          <Input className="mt-4" label="Search your closet" hideLabel placeholder="Search your closet…" type="search"
+          <Input className="mt-4" label="Search your closet" hideLabel placeholder="Search by name, kind or color…" type="search"
             value={query} onChange={(e) => setQuery(e.target.value)} />
           <div className="-mx-gutter mt-3 flex gap-2 overflow-x-auto px-gutter pb-1">
             <Chip selected={filter === 'all'} onClick={() => setFilter('all')}>All</Chip>
@@ -108,6 +109,7 @@ export function ClosetScreen() {
               {shown.map((item) => <ItemCard key={item.id} item={item} src={state.urls.get(item.image_path)} />)}
             </ul>
           )}
+          <Link to="/closet/packed" className="mt-6 block text-center text-label font-bold text-gold-deep underline">Packed away</Link>
           {items.length < 15 && (
             <Link to="/closet/start" className="mt-6 block text-center text-label font-bold text-gold-deep underline">
               {15 - items.length} to go for your top 15

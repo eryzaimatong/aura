@@ -11,9 +11,10 @@ export type ClosetItem = ClosetItemRow & { wearCount: number; lastWorn: string |
 const ITEM_COLUMNS =
   'id, user_id, name, category, subcategory, image_path, dominant_colors, lab_primary, in_palette, auto_tagged, seasonality, archived, created_at, updated_at';
 
-export async function listItems(userId: string): Promise<ClosetItem[]> {
+/** Active pieces, or with `archived` the ones packed away (kept with their wear history, out of outfits). */
+export async function listItems(userId: string, { archived = false } = {}): Promise<ClosetItem[]> {
   const [items, stats] = await Promise.all([
-    supabase.from('closet_items').select(ITEM_COLUMNS).eq('user_id', userId).eq('archived', false).order('created_at', { ascending: false }),
+    supabase.from('closet_items').select(ITEM_COLUMNS).eq('user_id', userId).eq('archived', archived).order('created_at', { ascending: false }),
     supabase.from('item_wear_stats').select('item_id, wear_count, last_worn').eq('user_id', userId),
   ]);
   if (items.error) throw items.error;
@@ -56,6 +57,13 @@ export async function saveItem(userId: string, image: Blob, item: NewItem): Prom
   }
   invalidateCloset();
   return data;
+}
+
+/** Pack a piece away (out of season, lent out, donated) or bring it back. */
+export async function setArchived(itemId: string, archived: boolean): Promise<void> {
+  const { error } = await supabase.from('closet_items').update({ archived }).eq('id', itemId);
+  if (error) throw error;
+  invalidateCloset();
 }
 
 /** Hard rule 5: deletion is real — the row (and its wear log, by cascade) and the photo. */
