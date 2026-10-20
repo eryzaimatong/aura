@@ -1,3 +1,4 @@
+import json
 import io
 from typing import Any
 
@@ -58,10 +59,13 @@ class FakeTagger:
 
 
 class FakeDb:
-    def __init__(self, palette: list[str]):
+    def __init__(self, palette: list[str], closet: list[dict[str, Any]] | None = None):
         self.palette = palette
+        self.closet = closet or []
 
     async def select(self, table: str, params: dict[str, str]) -> list[dict[str, Any]]:
+        if table == "closet_items":
+            return [r for r in self.closet if params["category"] == f"eq.{r['category']}"]
         return [{"palette": self.palette}] if self.palette else []
 
 
@@ -73,10 +77,10 @@ def jpeg() -> bytes:
 
 @pytest.fixture
 def client(monkeypatch: pytest.MonkeyPatch):
-    def make(palette: list[str], tagger: object = FakeTagger()):
+    def make(palette: list[str], tagger: object = FakeTagger(), closet: list[dict[str, Any]] | None = None):
         monkeypatch.setattr(items, "get_tagger", lambda: tagger)
         app.dependency_overrides[get_current_user] = lambda: USER
-        app.dependency_overrides[get_db] = lambda: FakeDb(palette)
+        app.dependency_overrides[get_db] = lambda: FakeDb(palette, closet)
         return TestClient(app)
     yield make
     app.dependency_overrides.clear()
@@ -111,3 +115,20 @@ def test_missing_models_is_503_not_crash(client):
             raise garments.TaggerUnavailable("no models")
     res = client([], Unavailable()).post("/api/items/tag", files={"image": ("a.jpg", jpeg(), "image/jpeg")})
     assert res.status_code == 503 and res.json()["detail"] == "tagging_unavailable"
+
+
+def test_flags_pieces_that_look_already_owned(client):
+    class Tagger(FakeTagger):
+        def tag(self, data: bytes) -> garments.TagResult:
+            r = super().tag(data)
+            return garments.TagResult(**{**r.__dict__, "embedding": [1.0] + [0.0] * 511})
+
+    near = [0.95, 0.31] + [0.0] * 510
+    closet = [
+        {"id": "same", "name": "Cream blazer", "category": "outerwear", "embedding": json.dumps(near), "lab_primary": [90.0, 2.0, 10.0]},
+        {"id": "other_colour", "name": "Navy blazer", "category": "outerwear", "embedding": near, "lab_primary": [20.0, 5.0, -25.0]},
+        {"id": "different", "name": "Denim jacket", "category": "outerwear", "embedding": [0.5, 0.86] + [0.0] * 510, "lab_primary": None},
+        {"id": "top", "name": "Cream tee", "category": "top", "embedding": near, "lab_primary": [90.0, 2.0, 10.0]},
+    ]
+    body = client([], Tagger(), closet).post("/api/items/tag", files={"image": ("a.jpg", jpeg(), "image/jpeg")}).json()
+    assert [s["id"] for s in body["similar"]] == ["same"]

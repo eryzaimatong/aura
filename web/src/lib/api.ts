@@ -98,6 +98,8 @@ export interface TagResponse {
   seasonality: Seasonality;
   suggested_name: string;
   embedding: number[];
+  /** Pieces already in the closet that look like this one. A nudge, never a block. */
+  similar: { id: string; name: string; similarity: number }[];
 }
 
 /** Garment photo → cut-out + suggestions. Nothing is saved by this call. */

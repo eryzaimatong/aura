@@ -16,6 +16,12 @@ class ColorOut(BaseModel):
     name: str
 
 
+class SimilarOut(BaseModel):
+    id: str
+    name: str
+    similarity: float
+
+
 class TagOut(BaseModel):
     """Suggestions to pre-fill the add-item form. Nothing is saved by this call."""
 
@@ -37,3 +43,5 @@ class TagOut(BaseModel):
     seasonality: Literal["warm", "cool", "all"]
     suggested_name: str
     embedding: list[float]
+    # Pieces already in the closet that look like this one (a nudge, never a block).
+    similar: list[SimilarOut] = []

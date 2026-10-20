@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { Button } from '../../components/Button';
 import { Chip } from '../../components/Chip';
 import { Input } from '../../components/Input';
@@ -100,6 +100,18 @@ export function AddItemScreen() {
               </div>
               {tags.palette_reason && <p className="mt-2 text-caption text-cocoa-soft">{tags.palette_reason}</p>}
               {!tags.cutout_ok && <p className="mt-2 text-caption text-cocoa-soft">Mira couldn’t separate it from the background, so the whole photo is kept.</p>}
+              {tags.similar.length > 0 && (
+                <p className="mt-3 rounded-md bg-tint-peach p-3 text-caption text-cocoa">
+                  This looks a lot like your{' '}
+                  {tags.similar.map((s, i) => (
+                    <span key={s.id}>
+                      {i > 0 && ' or '}
+                      <Link to={`/closet/item/${s.id}`} className="font-bold underline">{s.name.toLowerCase()}</Link>
+                    </span>
+                  ))}
+                  . If it’s a different piece, go ahead and save it.
+                </p>
+              )}
             </section>
           ) : (
             <p className="mt-4 rounded-md bg-sand p-3 text-caption text-cocoa-soft">Mira can’t tag photos right now, so pick the type yourself.</p>
