@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router';
+import { OfflineBanner } from './components/OfflineBanner';
 import { PublicOnly, RequireAuth } from './components/RouteGuards';
 import { AuthProvider } from './lib/auth/AuthProvider';
 import { DevCheckScreen } from './screens/DevCheckScreen';
@@ -52,6 +53,7 @@ const ScanScreen = lazy(() => import('./screens/mirror/scan/ScanScreen').then((m
 export default function App() {
   return (
     <AuthProvider>
+      <OfflineBanner />
       <BrowserRouter>
         <Routes>
           <Route element={<PublicOnly />}>
