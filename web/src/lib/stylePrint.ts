@@ -59,7 +59,7 @@ export const QUESTIONS: Question[] = [
     { label: 'I try most of them', icon: 'trending', nudge: [0, 0.5, 1, 0] },
     { label: 'I start them', icon: 'sparkles', nudge: [0, 1, 1, 0.5] },
   ] },
-  { prompt: 'Your favourite fit', choices: [
+  { prompt: 'Your favorite fit', choices: [
     { label: 'Fitted and tailored', icon: 'shirt', nudge: [1, 0, -0.5, 0] },
     { label: 'Relaxed and drapey', icon: 'flower', nudge: [-1, -0.5, 0, -0.5] },
     { label: 'Cropped and boxy', icon: 'square', nudge: [0.5, 0.5, 1, 1] },

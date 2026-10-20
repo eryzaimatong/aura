@@ -20,7 +20,7 @@ const QUESTIONS = [
   { key: 'veins', prompt: 'Your veins look…', options: [
     { value: 'blue', label: 'Blue or purple' }, { value: 'green', label: 'Green' }, { value: 'unsure', label: 'Hard to tell' },
   ] } satisfies Question<'veins'>,
-  { key: 'metal', prompt: 'Which jewellery suits you?', options: [
+  { key: 'metal', prompt: 'Which jewelry suits you?', options: [
     { value: 'silver', label: 'Silver' }, { value: 'gold', label: 'Gold' }, { value: 'both', label: 'Both equally' },
   ] } satisfies Question<'metal'>,
   { key: 'sun', prompt: 'In the sun you…', options: [
