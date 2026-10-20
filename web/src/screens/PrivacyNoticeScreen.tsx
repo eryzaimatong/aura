@@ -4,22 +4,31 @@ import { Card } from '../components/Card';
 import { Screen } from '../components/Screen';
 import { ScreenHeader } from '../components/ScreenHeader';
 
+// Must match what the code actually does. Change it together with the code, never ahead of it.
 const SECTIONS = [
   {
     title: 'What we collect',
-    body: 'Facial landmark measurements, skin, hair and eye color values, and the clothing photos you choose to upload.',
+    body: 'From a scan: five face-shape ratios, a skin and eye color reading, a skin-tone band and a lighting score. '
+      + 'The clothing photos you add, what you log wearing, and anything you choose to type in: body measurements, '
+      + 'style quiz answers, goals and trips.',
   },
   {
     title: 'What we never collect',
-    body: 'Your selfie. It is processed on your device and discarded as soon as the numbers are read.',
+    body: 'Your selfie. It is processed on your phone and discarded as soon as the numbers are read. No weight, and no exact location.',
   },
   {
     title: 'Who can see it',
-    body: 'Only you. Nothing is shared or sold. Analytics are aggregated and carry no identifying data.',
+    body: 'Only you. Nothing is shared or sold. Usage analytics are off unless you turn them on in Settings; '
+      + 'they never include photos, names or measurements, and they’re unlinked from you when you delete your account.',
+  },
+  {
+    title: 'Services we use',
+    body: 'Your account and data are stored with Supabase. For weather, a place name or a location rounded to about '
+      + '11 km is sent to Open-Meteo, and nothing that identifies you goes with it.',
   },
   {
     title: 'Your rights',
-    body: 'Export or delete everything from Settings. Deletion is immediate and permanent.',
+    body: 'Export or delete your data any time from Settings → Data and privacy. Deletion is immediate and permanent.',
   },
 ] as const;
 

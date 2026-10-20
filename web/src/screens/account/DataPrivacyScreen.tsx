@@ -74,6 +74,7 @@ export function DataPrivacyScreen() {
           <Row label="Color values" value="skin and eyes" />
           <Row label="Closet photos" value={summary ? `${summary.items} items` : '…'} />
           <Row label="Wear log" value={summary ? `${summary.wears} entries` : '…'} />
+          <Row label="What you typed in" value="measurements, style quiz, goals, trips" />
           <Row label="Selfies" value={<span className="font-bold text-success">none</span>} />
         </dl>
       </Card>
