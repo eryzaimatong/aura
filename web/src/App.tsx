@@ -23,6 +23,7 @@ import { QuickStartScreen } from './screens/closet/QuickStartScreen';
 import { DiaryScreen } from './screens/diary/DiaryScreen';
 import { ShareCardScreen } from './screens/mirror/card/ShareCardScreen';
 import { HistoryScreen } from './screens/diary/HistoryScreen';
+import { EditItemScreen } from './screens/closet/EditItemScreen';
 import { LookbookScreen } from './screens/looks/LookbookScreen';
 import { SavedLooksScreen } from './screens/looks/SavedLooksScreen';
 import { PlanTripScreen } from './screens/trips/PlanTripScreen';
@@ -87,6 +88,7 @@ export default function App() {
             <Route path="/closet/add" element={<AddItemScreen />} />
             <Route path="/closet/start" element={<QuickStartScreen />} />
             <Route path="/closet/item/:id" element={<ItemDetailScreen />} />
+            <Route path="/closet/item/:id/edit" element={<EditItemScreen />} />
             <Route path="/today" element={<TodayScreen />} />
             <Route path="/looks" element={<LookbookScreen />} />
             <Route path="/looks/saved" element={<SavedLooksScreen />} />

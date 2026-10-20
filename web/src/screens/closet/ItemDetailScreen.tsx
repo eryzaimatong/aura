@@ -8,7 +8,7 @@ import { useProfile } from '../../lib/auth/context';
 import { track } from '../../lib/analytics';
 import { authErrorMessage } from '../../lib/authErrors';
 import { deleteItem, localToday, logWearToday } from '../../lib/closet/data';
-import { CATEGORY_LABEL, capitalize, shortDate } from '../../lib/closet/labels';
+import { CATEGORY_LABEL, capitalize, SEASONALITY_LABEL, shortDate, SUBCATEGORIES } from '../../lib/closet/labels';
 import { mostWornRank, ordinal, pairsFor } from '../../lib/closet/pairs';
 import { FormAlert } from '../onboarding/FormAlert';
 import { SplashScreen } from '../SplashScreen';
@@ -34,6 +34,7 @@ export function ItemDetailScreen() {
   const pairs = pairsFor(item, state.items, state.log);
   const wornToday = item.lastWorn === localToday();
   const colour = item.dominant_colors[0]?.name;
+  const kind = SUBCATEGORIES[item.category].find((s) => s.key === item.subcategory)?.label;
 
   async function wore() {
     setBusy(true);
@@ -79,9 +80,13 @@ export function ItemDetailScreen() {
       <ItemPhoto src={state.urls.get(item.image_path)} alt={item.name} className="aspect-square rounded-lg" />
 
       <div className="mt-4 flex flex-wrap gap-2">
-        <span className="rounded-pill bg-lilac px-4 py-2 text-label">{CATEGORY_LABEL[item.category]}</span>
+        <span className="rounded-pill bg-lilac px-4 py-2 text-label">{kind ?? CATEGORY_LABEL[item.category]}</span>
         {colour && <span className="rounded-pill border-2 border-track bg-paper px-4 py-2 text-label">{capitalize(colour)}</span>}
         {item.in_palette && <span className="rounded-pill border-2 border-track bg-paper px-4 py-2 text-label">In palette</span>}
+        {item.seasonality && item.seasonality !== 'all' && (
+          <span className="rounded-pill border-2 border-track bg-paper px-4 py-2 text-label">{SEASONALITY_LABEL[item.seasonality]}</span>
+        )}
+        <Link to={`/closet/item/${item.id}/edit`} className="self-center text-label font-bold text-gold-deep underline">Edit</Link>
       </div>
 
       <dl className="mt-4 grid grid-cols-3 gap-3 text-center">

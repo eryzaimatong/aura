@@ -15,12 +15,22 @@ import { ItemPhoto } from './ItemPhoto';
 import { useCloset } from './useCloset';
 
 type Filter = 'all' | 'palette' | ItemCategory;
+type Sort = 'newest' | 'most' | 'least' | 'idle';
+
+const SORTS: Record<Sort, { label: string; cmp: (a: ClosetItem, b: ClosetItem) => number }> = {
+  newest: { label: 'Newest', cmp: (a, b) => b.created_at.localeCompare(a.created_at) },
+  most: { label: 'Most worn', cmp: (a, b) => b.wearCount - a.wearCount },
+  least: { label: 'Least worn', cmp: (a, b) => a.wearCount - b.wearCount },
+  // Never-worn first, then the longest since last worn.
+  idle: { label: 'Longest since worn', cmp: (a, b) => (a.lastWorn ?? '').localeCompare(b.lastWorn ?? '') },
+};
 
 export function ClosetScreen() {
   const navigate = useNavigate();
   const { state, reload } = useCloset();
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
+  const [sort, setSort] = useState<Sort>('newest');
 
   const items = state.status === 'ready' ? state.items : [];
   const present = useMemo(() => CATEGORIES.filter((c) => items.some((i) => i.category === c)), [items]);
@@ -28,8 +38,8 @@ export function ClosetScreen() {
     const q = query.trim().toLowerCase();
     return items.filter((i) =>
       (filter === 'all' || (filter === 'palette' ? i.in_palette === true : i.category === filter)) &&
-      (!q || i.name.toLowerCase().includes(q) || (i.subcategory ?? '').includes(q)));
-  }, [items, filter, query]);
+      (!q || i.name.toLowerCase().includes(q) || (i.subcategory ?? '').includes(q))).sort(SORTS[sort].cmp);
+  }, [items, filter, query, sort]);
 
   return (
     <Screen className="pb-32">
@@ -72,6 +82,13 @@ export function ClosetScreen() {
             ))}
             <Chip selected={filter === 'palette'} onClick={() => setFilter('palette')}>In palette</Chip>
           </div>
+          <label className="mt-3 flex items-center justify-end gap-2 text-label text-cocoa-soft">
+            Sort
+            <select value={sort} onChange={(e) => setSort(e.target.value as Sort)}
+              className="h-10 rounded-pill border-2 border-track bg-paper px-3 text-label text-cocoa focus:border-gold focus:outline-none">
+              {(Object.keys(SORTS) as Sort[]).map((s) => <option key={s} value={s}>{SORTS[s].label}</option>)}
+            </select>
+          </label>
 
           {shown.length === 0 ? (
             <p className="mt-8 text-center text-body text-cocoa-soft">Nothing matches. Try another filter.</p>
