@@ -60,7 +60,7 @@ export function LookbookScreen() {
         <div className="mt-4 flex items-center gap-3 rounded-md bg-tint-peach p-3">
           <ItemPhoto src={closet.urls.get(around.image_path)} alt="" className="size-14 shrink-0" />
           <p className="min-w-0 flex-1 text-label">Looks built around your <span className="font-bold">{around.name.toLowerCase()}</span></p>
-          <button type="button" aria-label="Stop building around this piece" onClick={() => { setWorn('idle'); setParams({}); }}
+          <button type="button" aria-label="Stop building around this piece" onClick={() => { setWorn('idle'); setParams({}); setOccasion((o) => o ?? 'class'); }}
             className="flex size-10 shrink-0 items-center justify-center rounded-pill bg-paper focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-deep">
             <X size={18} aria-hidden="true" />
           </button>
