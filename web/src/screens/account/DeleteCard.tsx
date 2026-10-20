@@ -6,7 +6,7 @@ import { cx } from '../../lib/cx';
 import type { DeleteScope } from '../../lib/database.types';
 
 const SCOPES: ReadonlyArray<{ value: DeleteScope; label: string; removes: string }> = [
-  { value: 'scans', label: 'Scan data only', removes: 'Your Aura Card, every scan’s measurements, quiz answers and corrections.' },
+  { value: 'scans', label: 'Scan data only', removes: 'Your Aura Card, every scan’s measurements, quiz answers, corrections and the Vanity picks made from them.' },
   { value: 'closet', label: 'Closet', removes: 'Every closet item and photo, your looks and your whole wear log.' },
   { value: 'all', label: 'Everything', removes: 'Your whole account: all of the above, your consents and your login. You’ll be signed out.' },
 ];
