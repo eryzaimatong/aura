@@ -80,8 +80,8 @@ The full rule set is in [`AURA-BRIEF.md`](AURA-BRIEF.md#3-hard-rules).
 
 1. In the **SQL Editor**, run the files in `db/` **in order**:
    `000_schema.sql` → `001_rls_hardening.sql` → `002_wear_log_ownership.sql` → `003_table_grants.sql`
-   → `004_closet_storage.sql` → `005_delete_my_data.sql` → `006_recommendation_grants.sql`.
-   Migrations 001–006 are safe to re-run.
+   → `004_closet_storage.sql` → `005_delete_my_data.sql` → `006_recommendation_grants.sql`
+   → `007_saved_looks.sql`. Migrations 001–007 are safe to re-run.
 2. Under **Authentication → URL Configuration**:
    - Set **Site URL** to `http://localhost:5173`.
    - Add `http://localhost:5173/**` to **Redirect URLs**.
@@ -141,6 +141,9 @@ component state). Neither ships in production builds.
 ```bash
 # API: classifier rules + endpoints against a fake database
 cd api && pytest
+
+# Web: unit tests (Vitest)
+cd web && npm test
 
 # Web: type check and production build
 cd web && npm run typecheck && npm run build
@@ -209,6 +212,13 @@ There's no PyTorch: everything runs on `onnxruntime`. Tagging takes about 2 s pe
   powers Shuffle. Every outfit carries a reason built from what actually drove the pick.
 - **Wearing** (`POST /api/outfits/wear`) records `outfits` and `outfit_items` and logs one
   `wear_log` row per piece (duplicates for the same day are skipped).
+- **Saved looks** (`POST /api/outfits/save`) records the outfit with `saved = true` and no wear.
+- **Style this piece:** `require_id` on `/api/outfits/generate` fixes one slot to that item
+  (any category except accessories), and the reason starts with "built around your …".
+- **Week planner** (`POST /api/week/plan`): seven looks from today, weekday and weekend
+  occasions, daily forecast for Metro Manila or the user's opted-in coarse location.
+- **Duplicate check:** `/api/items/tag` also returns `similar` — closet pieces of the same
+  category with CLIP similarity ≥ 0.9 and a close main colour. The app shows a note; it never blocks.
 - **Weather** (`GET /api/weather`) comes from [Open-Meteo](https://open-meteo.com/) (free, no
   key), cached for 30 minutes. It defaults to Metro Manila. The user can opt in to their own
   location, rounded to about 11 km and kept only on the device.
@@ -222,6 +232,9 @@ There's no PyTorch: everything runs on `onnxruntime`. Tagging takes about 2 s pe
 - **Share card:** drawn on-device on a canvas from the card's own fields (season, palette, and
   optionally face shape, undertone and first name). No selfie, no account link. Sharing is
   hidden for 13–17 accounts.
+- **Morning reminder** (Android only): a daily local notification set in Settings →
+  Notifications, scheduled on the phone and cleared on sign-out. Inexact alarms only
+  (`SCHEDULE_EXACT_ALARM` is removed from the manifest).
 - **Analytics:** the app writes `events` rows (`scan_completed`, `item_added`, `wear_logged`,
   `outfit_generated`, `outfit_worn`, `card_corrected`, `card_shared`) **only** when `profiles.share_analytics`
   is true. Props never hold personal data.
@@ -305,6 +318,7 @@ Also create `web/android/local.properties` with `sdk.dir=…` pointing at your A
 | + | Profile, Settings, Data & privacy (export + scoped deletion), forgot password | ✅ |
 | + | Vanity (makeup, hair, colours), Measurements, Style quiz + Style Print, Glow-up roadmap | ✅ |
 | + | Trip planner, Share card | ✅ |
+| + | Saved looks, Style this piece, Week planner, wear history calendar, item editing, closet sort and outfit math, rediscover nudges, duplicate check, offline notice, morning reminder | ✅ |
 | – | Shelf / product detail, Premium, Admin dashboards | not started |
 
 ### Known limitations
