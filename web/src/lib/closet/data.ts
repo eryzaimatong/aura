@@ -1,4 +1,4 @@
-import type { ClosetItemInsert, ClosetItemRow, WearLogRow } from '../database.types';
+import type { ClosetItemInsert, ClosetItemRow, DominantColor, WearLogRow } from '../database.types';
 import { supabase } from '../supabase';
 import { invalidateCloset } from './cache';
 
@@ -57,6 +57,28 @@ export async function saveItem(userId: string, image: Blob, item: NewItem): Prom
   }
   invalidateCloset();
   return data;
+}
+
+/**
+ * Swaps an item's photo. Colours and the CLIP embedding come from the photo, so they're
+ * refreshed too when Mira tagged it; the name, type and kind the user chose stay as they are.
+ */
+export async function replacePhoto(userId: string, item: Pick<ClosetItemRow, 'id' | 'image_path'>, image: Blob,
+  tags: { colors: DominantColor[]; lab_primary: [number, number, number] | null; in_palette: boolean | null; embedding: number[] } | null): Promise<void> {
+  const path = `${userId}/${crypto.randomUUID()}.webp`;
+  const up = await supabase.storage.from(BUCKET).upload(path, image, { contentType: 'image/webp', upsert: false });
+  if (up.error) throw up.error;
+  const { error } = await supabase.from('closet_items').update({
+    image_path: path,
+    ...(tags ? { dominant_colors: tags.colors, lab_primary: tags.lab_primary, in_palette: tags.in_palette, embedding: `[${tags.embedding.join(',')}]` } : {}),
+  }).eq('id', item.id);
+  if (error) {
+    await supabase.storage.from(BUCKET).remove([path]);
+    throw error;
+  }
+  const removed = await supabase.storage.from(BUCKET).remove([item.image_path]);
+  if (removed.error) console.warn('old photo not removed', removed.error);
+  invalidateCloset();
 }
 
 /** Pack a piece away (out of season, lent out, donated) or bring it back. */

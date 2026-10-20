@@ -5,13 +5,17 @@ import { Chip } from '../../components/Chip';
 import { Input } from '../../components/Input';
 import { Screen } from '../../components/Screen';
 import { ScreenHeader } from '../../components/ScreenHeader';
+import { useProfile } from '../../lib/auth/context';
 import { authErrorMessage } from '../../lib/authErrors';
+import { replacePhoto } from '../../lib/closet/data';
+import { PhotoError, processGarmentPhoto } from '../../lib/closet/process';
 import { CATEGORIES, CATEGORY_LABEL, SEASONALITY_LABEL, SUBCATEGORIES } from '../../lib/closet/labels';
 import type { ItemCategory, Seasonality } from '../../lib/database.types';
 import { supabase } from '../../lib/supabase';
 import { FormAlert } from '../onboarding/FormAlert';
 import { SplashScreen } from '../SplashScreen';
 import { ItemPhoto } from './ItemPhoto';
+import { PhotoDrop } from './PhotoDrop';
 import { useCloset } from './useCloset';
 
 /** Fix what Mira got wrong: name, type, kind and weather. Feeds straight into outfits. */
@@ -24,7 +28,9 @@ export function EditItemScreen() {
   const [category, setCategory] = useState<ItemCategory>('top');
   const [sub, setSub] = useState<string | null>(null);
   const [season, setSeason] = useState<Seasonality | null>(null);
+  const profile = useProfile();
   const [saving, setSaving] = useState(false);
+  const [photoState, setPhotoState] = useState<'idle' | 'working' | 'done'>('idle');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -53,6 +59,20 @@ export function EditItemScreen() {
     navigate(`/closet/item/${item!.id}`, { replace: true });
   }
 
+  async function newPhoto(file: File) {
+    setPhotoState('working');
+    setError(null);
+    try {
+      const { image, tags } = await processGarmentPhoto(file);
+      await replacePhoto(profile.id, item!, image, tags);
+      reload();
+      setPhotoState('done');
+    } catch (err) {
+      setError(err instanceof PhotoError ? err.message : authErrorMessage(err));
+      setPhotoState('idle');
+    }
+  }
+
   function pickCategory(c: ItemCategory) {
     setCategory(c);
     // A kind from another category would contradict the type.
@@ -63,8 +83,15 @@ export function EditItemScreen() {
     <Screen footer={<Button fullWidth disabled={saving || !!nameError} onClick={() => void save()}>{saving ? 'Saving…' : 'Save changes'}</Button>}>
       <ScreenHeader title="Edit item" backTo={`/closet/item/${item.id}`} />
       <div className="flex items-center gap-4">
-        <ItemPhoto src={state.urls.get(item.image_path)} alt="" className="size-20 shrink-0" />
-        <p className="text-caption text-cocoa-soft">Mira tagged this from the photo. Fix anything that’s off and outfits will use your version.</p>
+        <PhotoDrop className="size-24 shrink-0 p-1" title="" onFiles={([f]) => f && void newPhoto(f)} disabled={photoState === 'working'}>
+          <ItemPhoto src={state.urls.get(item.image_path)} alt="Replace the photo" className={photoState === 'working' ? 'size-full animate-pulse' : 'size-full'} />
+        </PhotoDrop>
+        <div>
+          <p className="text-caption text-cocoa-soft">Mira tagged this from the photo. Fix anything that’s off and outfits will use your version.</p>
+          <p role="status" className="mt-1 text-caption font-bold text-cocoa">
+            {photoState === 'working' ? 'Replacing the photo…' : photoState === 'done' ? 'New photo saved ✦' : 'Tap the photo to replace it.'}
+          </p>
+        </div>
       </div>
 
       <Input className="mt-6" label="Name" value={name} maxLength={60} error={nameError} onChange={(e) => setName(e.target.value)} />

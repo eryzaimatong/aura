@@ -24,7 +24,8 @@ export async function processGarmentPhoto(file: File): Promise<ProcessedPhoto> {
     return { image: base64ToBlob(tags.cutout_webp_base64, 'image/webp'), tags };
   } catch (err) {
     // Tagging is a helper, not a gate: offline or models missing → keep the photo, tag by hand.
-    const recoverable = err instanceof TypeError || (err instanceof ApiError && err.status >= 500);
+    // Offline, timed out (status 0) or a server error: keep the photo and tag by hand.
+    const recoverable = err instanceof TypeError || (err instanceof ApiError && (err.status >= 500 || err.status === 0));
     if (!recoverable) {
       if (err instanceof ApiError && err.code === 'unreadable_image') throw new PhotoError('Mira couldn’t read that photo. Try another one.');
       if (err instanceof ApiError && err.code === 'image_too_large') throw new PhotoError('That photo is too large. Try a smaller one.');
