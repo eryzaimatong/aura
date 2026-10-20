@@ -9,6 +9,7 @@ import { RoomNav } from '../../components/RoomNav';
 import { Screen } from '../../components/Screen';
 import type { ClosetItem } from '../../lib/closet/data';
 import { CATEGORIES, CATEGORY_LABEL, CATEGORY_PLURAL, wornLabel } from '../../lib/closet/labels';
+import { outfitMath } from '../../lib/closet/outfitMath';
 import type { ItemCategory } from '../../lib/database.types';
 import { FormAlert } from '../onboarding/FormAlert';
 import { ItemPhoto } from './ItemPhoto';
@@ -73,6 +74,16 @@ export function ClosetScreen() {
 
       {state.status === 'ready' && items.length > 0 && (
         <>
+          {(() => {
+            const m = outfitMath(items);
+            if (m.outfits === 0 && !m.next) return null;
+            return (
+              <p className="mt-3 text-caption text-cocoa-soft">
+                Your closet makes <span className="font-bold text-cocoa">{m.outfits} outfit{m.outfits === 1 ? '' : 's'}</span>
+                {m.next && <>. One more {m.next.category} would add {m.next.adds}.</>}
+              </p>
+            );
+          })()}
           <Input className="mt-4" label="Search your closet" hideLabel placeholder="Search your closet…" type="search"
             value={query} onChange={(e) => setQuery(e.target.value)} />
           <div className="-mx-gutter mt-3 flex gap-2 overflow-x-auto px-gutter pb-1">
