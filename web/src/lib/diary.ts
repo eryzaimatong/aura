@@ -90,3 +90,40 @@ export function insight(log: Wear[], items: ClosetItem[], year: number, month: n
   if (unworn.length >= 3) return `${unworn.length} pieces haven’t had an outing yet. The ${unworn[0]!.name.toLowerCase()} could be next.`;
   return 'Log what you wear for a week and Mira will start spotting patterns.';
 }
+
+export interface Rediscover {
+  item: ClosetItem;
+  /** Days since last worn, or since it was added if never worn. */
+  idleDays: number;
+  never: boolean;
+}
+
+const REDISCOVER_AFTER_DAYS = 30;
+const NEW_ITEM_GRACE_DAYS = 14;
+
+/**
+ * Pieces that haven't been out in a while, longest-idle first. Accessories are skipped
+ * (outfits aren't built around them). Never-worn pieces get a two-week grace period.
+ */
+export function rediscover(items: ClosetItem[], today: Date, limit = 3): Rediscover[] {
+  const t = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+  const days = (isoDate: string) => {
+    const [y, m, d] = isoDate.slice(0, 10).split('-').map(Number);
+    return Math.round((t - new Date(y ?? 1970, (m ?? 1) - 1, d ?? 1).getTime()) / 86_400_000);
+  };
+  return items
+    .filter((i) => i.category !== 'accessory' && !i.archived)
+    .map((item) => item.lastWorn
+      ? { item, idleDays: days(item.lastWorn), never: false }
+      : { item, idleDays: days(item.created_at), never: true })
+    .filter((r) => r.idleDays >= (r.never ? NEW_ITEM_GRACE_DAYS : REDISCOVER_AFTER_DAYS))
+    .sort((a, b) => b.idleDays - a.idleDays)
+    .slice(0, limit);
+}
+
+/** "last out 6 weeks ago" / "not worn yet": plain facts, never a judgement. */
+export function idleLabel(r: Rediscover): string {
+  if (r.never) return 'not worn yet';
+  const weeks = Math.floor(r.idleDays / 7);
+  return r.idleDays < 60 ? `last out ${weeks} weeks ago` : `last out ${Math.round(r.idleDays / 30)} months ago`;
+}

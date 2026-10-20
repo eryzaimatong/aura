@@ -14,7 +14,8 @@
     "android:dev": "node scripts/copy-mediapipe.mjs && vite build --mode android && cap sync android",
     "android:open": "cap open android",
     "android:icons": "capacitor-assets generate --android --assetPath resources --iconBackgroundColor \"#FDF6EC\" --splashBackgroundColor \"#FDF6EC\"",
-    "android:apk": "node scripts/android-gradle.mjs assembleDebug --console=plain"
+    "android:apk": "node scripts/android-gradle.mjs assembleDebug --console=plain",
+    "test": "vitest run"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.3",
@@ -44,6 +45,7 @@
     "@vitejs/plugin-react": "^6.1.2",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
-    "vite": "^8.3.4"
+    "vite": "^8.3.4",
+    "vitest": "5.0.3"
   }
 }

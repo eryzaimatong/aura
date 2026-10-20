@@ -5,7 +5,8 @@ import { Card } from '../../components/Card';
 import { Mira } from '../../components/Mira';
 import { RoomNav } from '../../components/RoomNav';
 import { Screen } from '../../components/Screen';
-import { insight, streak, topColours, utilisation, weeklyWears } from '../../lib/diary';
+import { idleLabel, insight, rediscover, streak, topColours, utilisation, weeklyWears } from '../../lib/diary';
+import { ItemPhoto } from '../closet/ItemPhoto';
 import { FormAlert } from '../onboarding/FormAlert';
 import { useCloset } from '../closet/useCloset';
 import { ColourBars, WeekBars } from './DiaryCharts';
@@ -36,6 +37,7 @@ export function DiaryScreen() {
       {state.status === 'ready' && (() => {
         const days = streak(state.log, now);
         const use = utilisation(state.items);
+        const idle = rediscover(state.items, now);
         return (
           <div className="mt-4 flex flex-col gap-4">
             <div className="flex items-center justify-between rounded-md bg-gold p-5 shadow-soft">
@@ -54,6 +56,26 @@ export function DiaryScreen() {
 
             <WeekBars weeks={weeklyWears(state.log, year, month)} />
             <ColourBars colours={topColours(state.log, state.items, year, month)} />
+
+            {idle.length > 0 && (
+              <Card className="flex flex-col gap-3">
+                <div>
+                  <p className="text-label font-bold">Ready for an outing</p>
+                  <p className="text-caption text-cocoa-soft">Tap one and Mira will build a look around it.</p>
+                </div>
+                <ul className="grid grid-cols-3 gap-3">
+                  {idle.map((r) => (
+                    <li key={r.item.id}>
+                      <Link to={`/looks?item=${r.item.id}`} className="block focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-deep">
+                        <ItemPhoto src={state.urls.get(r.item.image_path)} alt="" className="aspect-square w-full" />
+                        <span className="mt-1 block truncate text-caption font-bold">{r.item.name}</span>
+                        <span className="block text-micro text-cocoa-soft">{idleLabel(r)}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            )}
 
             <Card tone="lilac" flat className="flex items-center gap-3">
               <Mira expression="streak" size="sm" />

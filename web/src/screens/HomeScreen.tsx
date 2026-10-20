@@ -7,6 +7,7 @@ import { RoomNav } from '../components/RoomNav';
 import { Screen } from '../components/Screen';
 import { isMinor } from '../lib/ageBracket';
 import { useProfile } from '../lib/auth/context';
+import { idleLabel, rediscover } from '../lib/diary';
 import { FACE_SHAPE_NAMES, SEASON_NAMES } from '../lib/seasons';
 import { useCloset } from './closet/useCloset';
 import { OutfitCollage } from './looks/OutfitCollage';
@@ -38,11 +39,16 @@ export function HomeScreen() {
   const card = cardState.status === 'ready' ? cardState.card : null;
   const items = closet.status === 'ready' ? closet.items : [];
   const paletteTops = items.filter((i) => i.in_palette && i.category === 'top').length;
+  // Rotate the nudge daily so it isn't always the same piece.
+  const idle = rediscover(items, new Date());
+  const pick = idle.length ? idle[new Date().getDate() % idle.length] : undefined;
   const tip = !card
     ? { line: 'one selfie unlocks your palette', body: 'Scan once and every room learns what suits you.', to: '/mirror' }
     : items.length < 5
       ? { line: 'let’s fill your closet', body: 'Add the pieces you reach for most and outfits start appearing.', to: '/closet/start' }
-      : { line: 'found something for you', body: `${paletteTops} ${paletteTops === 1 ? 'top' : 'tops'} in your closet match your palette.`, to: '/closet' };
+      : pick
+        ? { line: `your ${pick.item.name.toLowerCase()} misses you`, body: `It’s ${idleLabel(pick)}. Tap and Mira will build a look around it.`, to: `/looks?item=${pick.item.id}` }
+        : { line: 'found something for you', body: `${paletteTops} ${paletteTops === 1 ? 'top' : 'tops'} in your closet match your palette.`, to: '/closet' };
 
   return (
     <Screen className="pb-32">
