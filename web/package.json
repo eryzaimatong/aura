@@ -15,6 +15,7 @@
     "android:open": "cap open android",
     "android:icons": "capacitor-assets generate --android --assetPath resources --iconBackgroundColor \"#FDF6EC\" --splashBackgroundColor \"#FDF6EC\"",
     "android:apk": "node scripts/android-gradle.mjs assembleDebug --console=plain",
+    "android:bundle": "npm run android:sync && node scripts/android-gradle.mjs bundleRelease --console=plain",
     "test": "vitest run"
   },
   "dependencies": {
