@@ -1,4 +1,5 @@
 import { Sparkles } from 'lucide-react';
+import { Link } from 'react-router';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { Mira } from '../../components/Mira';
@@ -18,7 +19,10 @@ export function DiaryScreen() {
     <Screen className="pb-32">
       <header className="flex items-end justify-between">
         <h1 className="font-display text-h1 font-semibold">The Diary</h1>
-        <span className="text-label text-cocoa-soft">{now.toLocaleDateString('en-PH', { month: 'long' })}</span>
+        <span className="flex items-baseline gap-4">
+          <span className="text-label text-cocoa-soft">{now.toLocaleDateString('en-PH', { month: 'long' })}</span>
+          <Link to="/diary/history" className="text-label font-bold text-gold-deep underline">History</Link>
+        </span>
       </header>
 
       {state.status === 'loading' && <p role="status" className="mt-10 text-center font-mira text-h3 text-cocoa-soft">turning the pages…</p>}

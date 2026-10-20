@@ -22,6 +22,7 @@ import { ItemDetailScreen } from './screens/closet/ItemDetailScreen';
 import { QuickStartScreen } from './screens/closet/QuickStartScreen';
 import { DiaryScreen } from './screens/diary/DiaryScreen';
 import { ShareCardScreen } from './screens/mirror/card/ShareCardScreen';
+import { HistoryScreen } from './screens/diary/HistoryScreen';
 import { LookbookScreen } from './screens/looks/LookbookScreen';
 import { SavedLooksScreen } from './screens/looks/SavedLooksScreen';
 import { PlanTripScreen } from './screens/trips/PlanTripScreen';
@@ -93,6 +94,7 @@ export default function App() {
             <Route path="/trips/new" element={<PlanTripScreen />} />
             <Route path="/trips/:id" element={<TripScreen />} />
             <Route path="/diary" element={<DiaryScreen />} />
+            <Route path="/diary/history" element={<HistoryScreen />} />
             <Route path="/vanity" element={<VanityScreen />} />
             <Route path="/rooms/:room" element={<RoomPlaceholderScreen />} />
             <Route path="/profile" element={<ProfileScreen />} />
