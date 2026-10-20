@@ -5,6 +5,9 @@ from pydantic import BaseModel, ConfigDict, Field
 
 Occasion = Literal["casual", "class", "work", "date", "formal", "travel"]
 
+# Closet item ids (UUIDs in production). Only safe characters: ids are used in PostgREST filters.
+ItemId = Annotated[str, Field(pattern=r"^[A-Za-z0-9_-]{1,64}$")]
+
 
 class WeatherIn(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -32,9 +35,9 @@ class GenerateIn(BaseModel):
     # Bump on "Shuffle" / "Show another" for a different outfit.
     seed: int = Field(default=0, ge=0, le=2**31)
     # The outfit just shown, so the next one moves away from it.
-    avoid_ids: Annotated[list[str], Field(max_length=10)] = []
+    avoid_ids: Annotated[list[ItemId], Field(max_length=10)] = []
     # "Style this piece": build the outfit around this closet item.
-    require_id: str | None = Field(default=None, max_length=64)
+    require_id: ItemId | None = None
 
 
 class OutfitPieceOut(BaseModel):
@@ -55,7 +58,7 @@ class OutfitOut(BaseModel):
 class SaveIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    item_ids: Annotated[list[str], Field(min_length=1, max_length=8)]
+    item_ids: Annotated[list[ItemId], Field(min_length=1, max_length=8)]
     occasion: Occasion | None = None
     weather: WeatherIn | None = None
     reason: str = Field(min_length=1, max_length=500)

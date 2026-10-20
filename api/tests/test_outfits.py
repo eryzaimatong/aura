@@ -227,3 +227,10 @@ def test_save_records_without_wear_log(client):
     assert res.status_code == 200, res.text
     assert db.inserted["outfits"][0]["saved"] is True and "wear_log" not in db.inserted
     assert len(db.inserted["outfit_items"]) == 2
+
+
+def test_rejects_ids_that_could_break_filters(client):
+    c, _ = client(basic_closet())
+    bad = {"item_ids": ["a),user_id.neq.(x"], "reason": "x", "generator_v": "g"}
+    assert c.post("/api/outfits/save", json=bad).status_code == 422
+    assert c.post("/api/outfits/generate", json={"require_id": "x,y"}).status_code == 422

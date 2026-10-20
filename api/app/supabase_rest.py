@@ -1,5 +1,6 @@
 """Minimal PostgREST client that acts as the signed-in user (RLS applies)."""
 
+import logging
 from typing import Any
 
 import httpx
@@ -8,6 +9,7 @@ from fastapi import HTTPException, status
 from app.config import settings
 
 Row = dict[str, Any]
+log = logging.getLogger("aura.db")
 
 
 class SupabaseRest:
@@ -29,9 +31,17 @@ class SupabaseRest:
             headers["Prefer"] = prefer
         try:
             res = await self._client.request(method, self._url(table), params=params, json=json, headers=headers)
-        except httpx.HTTPError:
+        except httpx.HTTPError as e:
+            log.warning("database unreachable: %s %s (%s)", method, table, type(e).__name__)
             raise HTTPException(status.HTTP_502_BAD_GATEWAY, detail="database_unreachable") from None
         if res.status_code >= 400:
+            # PostgREST's code and message say why (RLS, constraint, grant); never the request body.
+            try:
+                err = res.json()
+                why = f"{err.get('code')}: {str(err.get('message'))[:200]}"
+            except ValueError:
+                why = res.text[:200]
+            log.warning("database error: %s %s -> %s %s", method, table, res.status_code, why)
             raise HTTPException(status.HTTP_502_BAD_GATEWAY, detail=f"database_error:{table}:{res.status_code}")
         return res.json() if res.content else []
 
