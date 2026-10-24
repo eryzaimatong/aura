@@ -234,3 +234,14 @@ def test_rejects_ids_that_could_break_filters(client):
     bad = {"item_ids": ["a),user_id.neq.(x"], "reason": "x", "generator_v": "g"}
     assert c.post("/api/outfits/save", json=bad).status_code == 422
     assert c.post("/api/outfits/generate", json={"require_id": "x,y"}).status_code == 422
+
+
+def test_no_layer_in_real_heat_even_with_bonuses():
+    jacket = piece("denim_jacket", "outerwear", "jacket", in_palette=True, lab=NAVY)  # palette + unworn bonuses
+    hot = Weather(32, 36, 10)
+    for s in range(30):
+        o = generate(basic_closet() + [jacket], occasion=None, weather=hot, today=TODAY, seed=s)
+        assert "denim_jacket" not in {p.id for p in o.pieces}
+    # ...unless that's the piece being styled.
+    o = generate(basic_closet() + [jacket], occasion=None, weather=hot, today=TODAY, require=jacket)
+    assert "denim_jacket" in {p.id for p in o.pieces}

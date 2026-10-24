@@ -156,7 +156,7 @@ STYLABLE = {"top", "bottom", "dress", "shoes", "outerwear", "bag"}
 
 
 def _search(by_cat: dict[str, list[Piece]], scores: dict[str, float],
-            require: Piece | None = None) -> tuple[list[Piece], float]:
+            require: Piece | None = None, hot: bool = False) -> tuple[list[Piece], float]:
     req = require.category if require is not None else None
 
     def top(cat: str, k: int) -> list[Piece]:
@@ -174,7 +174,8 @@ def _search(by_cat: dict[str, list[Piece]], scores: dict[str, float],
             missing = ["top"]
         raise NotEnoughItems(missing)
     shoes = top("shoes", 3) or [None]  # shoes are required when you own any
-    outer = top("outerwear", 1) if req == "outerwear" else [p for p in top("outerwear", 2) if scores[p.id] > 0.3] + [None]
+    # In real heat a layer never makes sense, whatever the other bonuses say (unless it's the piece being styled).
+    outer = top("outerwear", 1) if req == "outerwear" else [None] if hot else [p for p in top("outerwear", 2) if scores[p.id] > 0.3] + [None]
     bags = top("bag", 1) if req == "bag" else [p for p in top("bag", 1) if scores[p.id] > 0.3] + [None]
 
     best: tuple[list[Piece], float] = ([], -math.inf)
@@ -202,7 +203,8 @@ def generate(closet: list[Piece], *, occasion: str | None, weather: Weather | No
     # Same jitter for both runs so the weather comparison below is like-for-like.
     jitter = {p.id: float(j) for p, j in zip(closet, np.random.default_rng(seed).gumbel(0, 0.6, len(closet)))}
     scores = {p.id: piece_score(p, occasion, weather, today, avoid, vecs, prefer) + jitter[p.id] for p in closet}
-    pieces, total = _search(by_cat, scores, require)
+    hot = weather is not None and weather.feels_c >= HOT_FEELS_C
+    pieces, total = _search(by_cat, scores, require, hot)
 
     note = None
     if weather is not None:
