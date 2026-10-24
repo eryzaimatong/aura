@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     # deployed API doesn't publish its whole surface; set EXPOSE_DOCS=true locally.
     expose_docs: bool = False
 
+    # Seconds of clock difference tolerated on login tokens. Servers keep synced clocks, so 60 is
+    # plenty in production; raise it locally only if your computer's clock drifts (JWT_LEEWAY_S).
+    jwt_leeway_s: int = 60
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]

@@ -66,7 +66,7 @@ def test_es256_verified_locally_without_network(monkeypatch):
 
 def test_es256_expired_is_session_expired():
     with pytest.raises(HTTPException) as e:
-        call(es256(exp=int(time.time()) - auth.CLOCK_SKEW_S - 10))
+        call(es256(exp=int(time.time()) - settings.jwt_leeway_s - 10))
     assert e.value.status_code == 401 and e.value.detail == "session_expired"
 
 

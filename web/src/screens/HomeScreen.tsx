@@ -105,15 +105,19 @@ export function HomeScreen() {
 
       <h2 className="mt-6 text-label font-bold">Jump back in</h2>
       <ul className="mt-2 grid grid-cols-2 gap-3">
-        {TILES.map(({ to, label, Icon, tint }) => (
-          <li key={to}>
-            <button type="button" onClick={() => navigate(to)}
-              className="flex w-full flex-col items-start gap-3 rounded-md bg-paper p-4 text-left shadow-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-deep">
-              <span className={`flex size-11 items-center justify-center rounded-sm ${tint}`}><Icon aria-hidden="true" size={22} /></span>
-              <span className="text-body font-bold">{label}</span>
-            </button>
-          </li>
-        ))}
+        {TILES.map(({ to, label: tileLabel, Icon, tint }) => {
+          // Before the first scan, "Scan again" makes no sense.
+          const label = to === '/mirror' && !card ? 'Take my selfie' : tileLabel;
+          return (
+            <li key={to}>
+              <button type="button" onClick={() => navigate(to)}
+                className="flex w-full flex-col items-start gap-3 rounded-md bg-paper p-4 text-left shadow-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-deep">
+                <span className={`flex size-11 items-center justify-center rounded-sm ${tint}`}><Icon aria-hidden="true" size={22} /></span>
+                <span className="text-body font-bold">{label}</span>
+              </button>
+            </li>
+            );
+        })}
       </ul>
 
       {isMinor(profile.age_bracket) && <p className="mt-4 text-caption text-cocoa-soft">Sharing stays off on under-18 accounts.</p>}

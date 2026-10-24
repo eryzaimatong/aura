@@ -29,9 +29,6 @@ class _Rejected(Exception):
         self.code = code
 
 
-# Supabase's clock and this server's are never exactly in step: without leeway a token issued
-# a second "in the future" is rejected right after login (ImmatureSignatureError).
-CLOCK_SKEW_S = 60
 
 
 @lru_cache(maxsize=1)
@@ -44,7 +41,10 @@ def _verify_locally(token: str) -> str:
     try:
         key = _jwks_client().get_signing_key_from_jwt(token)
         claims = jwt.decode(token, key.key, algorithms=["ES256", "RS256"], audience="authenticated",
-                            issuer=settings.supabase_issuer, leeway=CLOCK_SKEW_S)
+                            issuer=settings.supabase_issuer,
+                            # Supabase's clock and ours are never exactly in step: without leeway a token
+                            # issued a second "in the future" is rejected right after login.
+                            leeway=settings.jwt_leeway_s)
     except jwt.ExpiredSignatureError:
         raise _Rejected("session_expired") from None
     sub = claims.get("sub")
