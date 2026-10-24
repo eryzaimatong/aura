@@ -66,7 +66,7 @@ def test_es256_verified_locally_without_network(monkeypatch):
 
 def test_es256_expired_is_session_expired():
     with pytest.raises(HTTPException) as e:
-        call(es256(exp=int(time.time()) - 10))
+        call(es256(exp=int(time.time()) - auth.CLOCK_SKEW_S - 10))
     assert e.value.status_code == 401 and e.value.detail == "session_expired"
 
 
@@ -119,3 +119,9 @@ def test_rejections_are_never_cached(monkeypatch):
         with pytest.raises(HTTPException):
             call(token)
     assert len(calls) == 2
+
+
+def test_tolerates_small_clock_skew():
+    # Issued 20 s "in the future" by Supabase's clock.
+    future = int(time.time()) + 20
+    assert call(es256(iat=future, nbf=future)).id == "user-1"
