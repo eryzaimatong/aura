@@ -2,9 +2,13 @@ import { Heart, Scissors, Sparkles } from 'lucide-react';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { cx } from '../../lib/cx';
+import type { FaceShape } from '../../lib/database.types';
 import type { VanityRec } from '../../lib/vanity';
+import { HairSketch, hasHairSketch, PlacementSketch } from './Sketch';
 
-function Thumb({ rec }: { rec: VanityRec }) {
+function Thumb({ rec, faceShape }: { rec: VanityRec; faceShape: FaceShape }) {
+  if (rec.kind === 'hair' && hasHairSketch(rec.key)) return <HairSketch styleKey={rec.key} />;
+  if (rec.key === 'placement') return <PlacementSketch shape={faceShape} />;
   if (rec.swatches.length > 0) {
     return (
       <div className="flex size-20 shrink-0 flex-wrap content-center items-center justify-center gap-1 rounded-sm bg-tint-lilac p-2" aria-hidden="true">
@@ -25,15 +29,16 @@ function Thumb({ rec }: { rec: VanityRec }) {
 }
 
 /** One pick: thumbnail, title, "Why:" line (hard rule 7), Save / Not for me. */
-export function RecCard({ rec, onSave, onDismiss, busy }: {
+export function RecCard({ rec, faceShape, onSave, onDismiss, busy }: {
   rec: VanityRec;
+  faceShape: FaceShape;
   onSave: () => void;
   onDismiss: () => void;
   busy: boolean;
 }) {
   return (
     <Card className="flex gap-3">
-      <Thumb rec={rec} />
+      <Thumb rec={rec} faceShape={faceShape} />
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <div>
           <p className="text-label font-bold">{rec.title}</p>

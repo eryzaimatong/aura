@@ -87,7 +87,7 @@ export function VanityScreen() {
 
           <div className="mt-4 flex flex-col gap-3">
             {visible.map((r) => (
-              <RecCard key={r.id} rec={r} busy={busyId === r.id}
+              <RecCard key={r.id} rec={r} faceShape={c.face_shape} busy={busyId === r.id}
                 onSave={() => void act(r, () => setSaved(profile.id, r.id, !r.saved), { saved: !r.saved })}
                 onDismiss={() => void act(r, () => dismiss(profile.id, r.id), { dismissed: true })} />
             ))}
