@@ -76,7 +76,7 @@ export function AuraCardScreen() {
       <button
         type="button"
         onClick={() => navigate('/mirror/correct')}
-        className="mt-4 self-center text-label font-bold text-gold-deep underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-deep"
+        className="mt-4 self-center text-label font-bold text-cocoa underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-deep"
       >
         This doesn’t look like me
       </button>

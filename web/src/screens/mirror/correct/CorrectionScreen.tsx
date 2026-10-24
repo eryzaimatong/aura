@@ -82,7 +82,7 @@ function CorrectionForm({ card, userSet }: { card: AuraCardRow; userSet: UserSet
 
       <Card tone="lilac" flat>
         {/* Once the user has changed something, these aren't Mira's words any more. */}
-        <p className="text-micro font-bold uppercase tracking-wide text-gold-deep">
+        <p className="text-micro font-bold uppercase tracking-wide text-cocoa">
           {userSet.faceShape || userSet.colors ? 'Your card says' : 'I said'}
         </p>
         <p className="mt-1 font-display text-h3 font-semibold">

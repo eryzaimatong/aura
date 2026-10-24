@@ -50,10 +50,10 @@ export function LookbookScreen() {
       <header>
         <h1 className="font-display text-h1 font-semibold">The Lookbook</h1>
         <nav aria-label="More looks" className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
-          <Link to="/today" className="text-label font-bold text-gold-deep underline">Today’s pick</Link>
-          <Link to="/looks/week" className="text-label font-bold text-gold-deep underline">My week</Link>
-          <Link to="/looks/saved" className="text-label font-bold text-gold-deep underline">Saved looks</Link>
-          <Link to="/trips" className="text-label font-bold text-gold-deep underline">Trips</Link>
+          <Link to="/today" className="text-label font-bold text-cocoa underline">Today’s pick</Link>
+          <Link to="/looks/week" className="text-label font-bold text-cocoa underline">My week</Link>
+          <Link to="/looks/saved" className="text-label font-bold text-cocoa underline">Saved looks</Link>
+          <Link to="/trips" className="text-label font-bold text-cocoa underline">Trips</Link>
         </nav>
       </header>
       {around && closet.status === 'ready' && (

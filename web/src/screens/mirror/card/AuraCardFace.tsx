@@ -12,7 +12,7 @@ export function AuraCardFace({ card }: { card: AuraCardRow }) {
 
   return (
     <Card tone="opal" emphasis className="p-6">
-      <p className="text-micro font-bold uppercase tracking-wide text-gold-deep">Your Aura Card</p>
+      <p className="text-micro font-bold uppercase tracking-wide text-cocoa">Your Aura Card</p>
       <h2 className="mt-3 font-display text-h1 font-semibold">{card.season ? SEASON_NAMES[card.season] : 'Colors to finish'}</h2>
       <p className="mt-1 text-body text-cocoa-soft">
         {shape}

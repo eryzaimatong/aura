@@ -84,7 +84,7 @@ export function RoadmapScreen() {
                           <span className="block text-caption text-cocoa-soft">{p ? p.subtitle : g.detail}</span>
                         )}
                       </span>
-                      {g.state === 'now' && <span className="text-label font-bold text-gold-deep">now</span>}
+                      {g.state === 'now' && <span className="text-label font-bold text-cocoa">now</span>}
                       {g.state !== 'done' && p?.met && <span className="text-micro font-bold text-success">ready to tick off</span>}
                     </button>
                     {isOpen && (
@@ -92,7 +92,7 @@ export function RoadmapScreen() {
                         {g.state !== 'done' && <Button size="sm" onClick={() => void change(g.id, 'done')}>Mark done</Button>}
                         {g.state === 'done' && <Button size="sm" variant="outline" onClick={() => void change(g.id, 'later')}>Not done yet</Button>}
                         {g.state !== 'now' && g.state !== 'done' && <Button size="sm" variant="outline" onClick={() => void change(g.id, 'now')}>Make it my focus</Button>}
-                        {p?.link && <Link to={p.link} className="self-center text-label font-bold text-gold-deep underline">Work on it</Link>}
+                        {p?.link && <Link to={p.link} className="self-center text-label font-bold text-cocoa underline">Work on it</Link>}
                         <Button size="sm" variant="ghost" onClick={() => void change(g.id, 'dropped')}>Remove</Button>
                       </div>
                     )}

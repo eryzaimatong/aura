@@ -32,7 +32,7 @@ export function StylePrintScreen() {
     <Screen footer={<Button fullWidth onClick={() => navigate('/profile/style/quiz')}>Retake the quiz</Button>}>
       <ScreenHeader title="Your Style Print" backTo="/profile" />
       <Card tone="lilac" emphasis className="p-6">
-        <p className="text-micro font-bold uppercase tracking-wide text-gold-deep">Style Print</p>
+        <p className="text-micro font-bold uppercase tracking-wide text-cocoa">Style Print</p>
         <h2 className="mt-2 font-display text-h1 font-semibold">{label}</h2>
         <p className="mt-2 text-label text-cocoa-soft">{blurb}</p>
       </Card>

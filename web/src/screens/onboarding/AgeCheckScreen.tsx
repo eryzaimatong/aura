@@ -73,8 +73,7 @@ export function AgeCheckScreen() {
       <Card tone="sand" flat className="mt-4">
         <p className="text-label font-bold">If you are under 18</p>
         <p className="mt-1 text-caption text-cocoa-soft">
-          A parent or guardian has to give consent before any scan. Sharing, the shop and the community stay switched
-          off.
+          A parent or guardian has to give consent before any scan, and sharing stays switched off.
         </p>
       </Card>
       <p className="mt-4 text-caption text-cocoa-soft">We store your age bracket, never your birth date.</p>

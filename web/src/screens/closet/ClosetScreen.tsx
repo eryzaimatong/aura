@@ -110,9 +110,9 @@ export function ClosetScreen() {
               {shown.map((item) => <ItemCard key={item.id} item={item} src={state.urls.get(item.image_path)} />)}
             </ul>
           )}
-          <Link to="/closet/packed" className="mt-6 block text-center text-label font-bold text-gold-deep underline">Packed away</Link>
+          <Link to="/closet/packed" className="mt-6 block text-center text-label font-bold text-cocoa underline">Packed away</Link>
           {items.length < 15 && (
-            <Link to="/closet/start" className="mt-6 block text-center text-label font-bold text-gold-deep underline">
+            <Link to="/closet/start" className="mt-6 block text-center text-label font-bold text-cocoa underline">
               {15 - items.length} to go for your top 15
             </Link>
           )}

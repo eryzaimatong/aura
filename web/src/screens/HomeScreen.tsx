@@ -116,7 +116,7 @@ export function HomeScreen() {
         ))}
       </ul>
 
-      {isMinor(profile.age_bracket) && <p className="mt-4 text-caption text-cocoa-soft">Sharing and the shop stay off on under-18 accounts.</p>}
+      {isMinor(profile.age_bracket) && <p className="mt-4 text-caption text-cocoa-soft">Sharing stays off on under-18 accounts.</p>}
       <RoomNav active={null} />
     </Screen>
   );

@@ -99,7 +99,7 @@ export function ItemDetailScreen() {
         {item.seasonality && item.seasonality !== 'all' && (
           <span className="rounded-pill border-2 border-track bg-paper px-4 py-2 text-label">{SEASONALITY_LABEL[item.seasonality]}</span>
         )}
-        <Link to={`/closet/item/${item.id}/edit`} className="self-center text-label font-bold text-gold-deep underline">Edit</Link>
+        <Link to={`/closet/item/${item.id}/edit`} className="self-center text-label font-bold text-cocoa underline">Edit</Link>
       </div>
 
       <dl className="mt-4 grid grid-cols-3 gap-3 text-center">

@@ -71,7 +71,7 @@ export function LoginScreen() {
           onChange={(e) => setPassword(e.target.value)}
         />
       </form>
-      <Link to="/forgot" className="mt-3 self-end text-label font-bold text-gold-deep">Forgot password?</Link>
+      <Link to="/forgot" className="mt-3 self-end text-label font-bold text-cocoa underline">Forgot password?</Link>
     </Screen>
   );
 }

@@ -25,7 +25,7 @@ export function ageBracketFromDob(dob: Date, today: Date = new Date()): AgeBrack
   return '45_plus';
 }
 
-/** Minors get guardian consent, and sharing and the shop are turned off. */
+/** Minors get guardian consent, and sharing is turned off. */
 export function isMinor(bracket: AgeBracket): boolean {
   return bracket === '13_17';
 }

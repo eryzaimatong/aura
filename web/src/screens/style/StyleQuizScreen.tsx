@@ -59,7 +59,7 @@ export function StyleQuizScreen() {
       <ScreenHeader title="Style Print" backTo="/profile" />
       <div className="flex justify-between text-label">
         <span className="text-cocoa-soft">Question {step + 1} of {QUESTIONS.length}</span>
-        <span className="font-bold text-gold-deep">{pct}%</span>
+        <span className="font-bold text-cocoa">{pct}%</span>
       </div>
       <div className="mt-2 h-2 w-full overflow-hidden rounded-pill bg-track" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}>
         <div className="h-full rounded-pill bg-gold transition-[width]" style={{ width: `${pct}%` }} />
@@ -86,7 +86,7 @@ export function StyleQuizScreen() {
       </div>
 
       {step > 0 && (
-        <button type="button" onClick={() => setStep((s) => s - 1)} className="mt-3 self-start text-label font-bold text-gold-deep underline">
+        <button type="button" onClick={() => setStep((s) => s - 1)} className="mt-3 self-start text-label font-bold text-cocoa underline">
           Previous question
         </button>
       )}

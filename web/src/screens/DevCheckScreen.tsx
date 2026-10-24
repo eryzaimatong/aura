@@ -73,7 +73,7 @@ export function DevCheckScreen() {
       </section>
 
       {import.meta.env.DEV && (
-        <Link to="/components" className="mt-6 block text-center text-label font-bold text-gold-deep underline">
+        <Link to="/components" className="mt-6 block text-center text-label font-bold text-cocoa underline">
           Open the component gallery
         </Link>
       )}

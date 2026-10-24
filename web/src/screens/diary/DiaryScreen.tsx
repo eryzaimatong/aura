@@ -22,7 +22,7 @@ export function DiaryScreen() {
         <h1 className="font-display text-h1 font-semibold">The Diary</h1>
         <span className="flex items-baseline gap-4">
           <span className="text-label text-cocoa-soft">{now.toLocaleDateString('en-PH', { month: 'long' })}</span>
-          <Link to="/diary/history" className="text-label font-bold text-gold-deep underline">History</Link>
+          <Link to="/diary/history" className="text-label font-bold text-cocoa underline">History</Link>
         </span>
       </header>
 

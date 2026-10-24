@@ -40,7 +40,7 @@ export function WeatherCard({ state, usingDefault, onUseLocation, locError }: {
           feels like {Math.round(w.feels_c)}°
         </p>
         {usingDefault && (
-          <button type="button" onClick={onUseLocation} className="mt-1 text-micro font-bold text-gold-deep underline">
+          <button type="button" onClick={onUseLocation} className="mt-1 text-micro font-bold text-cocoa underline">
             Use my location
           </button>
         )}

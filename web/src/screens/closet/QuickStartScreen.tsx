@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { CircleAlert, LoaderCircle } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { Button } from '../../components/Button';
-import { Card } from '../../components/Card';
 import { Screen } from '../../components/Screen';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { useProfile } from '../../lib/auth/context';
@@ -71,7 +70,7 @@ export function QuickStartScreen() {
       <ScreenHeader title="Add your top 15" backTo="/closet" />
       <div className="flex justify-between text-label">
         <span className="text-cocoa-soft">{Math.min(added, GOAL)} of {GOAL} added</span>
-        {left > 0 && <span className="font-bold text-gold-deep">about {Math.max(1, Math.round((left * SECONDS_PER_ITEM) / 60))} min left</span>}
+        {left > 0 && <span className="font-bold text-cocoa">about {Math.max(1, Math.round((left * SECONDS_PER_ITEM) / 60))} min left</span>}
       </div>
       <div className="mt-2 h-2 w-full overflow-hidden rounded-pill bg-track" role="progressbar" aria-valuemin={0} aria-valuemax={GOAL} aria-valuenow={added}>
         <div className="h-full rounded-pill bg-gold transition-[width]" style={{ width: `${Math.min(100, (added / GOAL) * 100)}%` }} />
@@ -100,13 +99,6 @@ export function QuickStartScreen() {
         </ul>
       )}
 
-      <Card tone="sand" flat className="mt-4">
-        <p className="text-label font-bold">Faster ways <span className="font-normal text-cocoa-soft">· coming soon</span></p>
-        <ul className="mt-2 flex flex-col gap-1 text-caption text-cocoa-soft">
-          <li>Import from a shopping screenshot</li>
-          <li>Forward an order confirmation email</li>
-        </ul>
-      </Card>
     </Screen>
   );
 }

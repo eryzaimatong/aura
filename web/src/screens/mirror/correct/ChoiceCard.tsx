@@ -35,7 +35,7 @@ export function ChoiceCard<T extends string>({ question, choices, more, value, o
         </Chip>
       </div>
       {more && !showMore && (
-        <button type="button" onClick={() => setShowMore(true)} className="mt-3 text-label font-bold text-gold-deep underline">
+        <button type="button" onClick={() => setShowMore(true)} className="mt-3 text-label font-bold text-cocoa underline">
           See all options
         </button>
       )}

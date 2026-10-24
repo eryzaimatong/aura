@@ -48,7 +48,6 @@ export function GuardianScreen() {
         <ul className="flex list-disc flex-col gap-1 pl-5 text-caption text-cocoa-soft">
           <li>Your selfie is analyzed on this phone and never uploaded.</li>
           <li>Sharing your Aura Card is switched off.</li>
-          <li>The shop and the community are switched off.</li>
           <li>You or your guardian can delete everything at any time.</li>
         </ul>
       </Card>
