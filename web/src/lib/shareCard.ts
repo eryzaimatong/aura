@@ -90,7 +90,7 @@ export async function renderShareCard(content: ShareContent, format: ShareFormat
   const inner = w - left * 2;
   let y = cardTop + 120;
 
-  ctx.fillStyle = token('gold-deep');
+  ctx.fillStyle = token('cocoa-soft');
   ctx.font = '700 34px "Nunito Variable", sans-serif';
   ctx.fillText(content.name ? `${content.name.toUpperCase()}’S AURA CARD` : 'MY AURA CARD', left, y);
 
