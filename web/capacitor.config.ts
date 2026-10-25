@@ -2,10 +2,10 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 /**
  * `npm run android:dev` points the app at the API on your computer (http://10.0.2.2:8000 from
- * the emulator). That needs plain-HTTP and mixed-content exceptions, which are switched on ONLY
+ * the emulator); `npm run android:phone` (which sets AURA_DEV_API=1) does the same for a real phone on your Wi-Fi. That needs plain-HTTP and mixed-content exceptions, which are switched on ONLY
  * for that script — release builds never get them.
  */
-const devApi = process.env.npm_lifecycle_event === 'android:dev';
+const devApi = process.env.npm_lifecycle_event === 'android:dev' || process.env.AURA_DEV_API === '1';
 
 // Native config takes literal colours: this is surface/cream (#FDF6EC) from the design tokens.
 const CREAM = '#FDF6EC';

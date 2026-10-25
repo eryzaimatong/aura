@@ -292,6 +292,7 @@ Also create `web/android/local.properties` with `sdk.dir=…` pointing at your A
 | Command (from `web/`) | What it does |
 |---|---|
 | `npm run android:dev` | Builds the web app against your **local API** (`http://10.0.2.2:8000`, the emulator's address for your computer) and syncs it into the Android project. HTTP is allowed in this build only. |
+| `npm run android:phone` | Test APK for **your own phone** on the same Wi-Fi as this computer: finds the computer's Wi-Fi address, points the app at the API there, and copies `AURA-test.apk` to your Downloads. Run the API with `--host 0.0.0.0` and allow it through the Windows firewall (Private networks). |
 | `npm run android:sync` | Production web build (uses `VITE_API_URL` from `.env.local`) and sync. |
 | `npm run android:open` | Opens the project in Android Studio. Press ▶ Run to install on the emulator or a phone. |
 | `npm run android:apk` | Builds a debug APK from the command line → `web/android/app/build/outputs/apk/debug/app-debug.apk`. |

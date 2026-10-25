@@ -12,6 +12,7 @@
     "preview": "vite preview",
     "android:sync": "npm run build && cap sync android",
     "android:dev": "node scripts/copy-mediapipe.mjs && vite build --mode android && cap sync android",
+    "android:phone": "node scripts/phone-build.mjs",
     "android:open": "cap open android",
     "android:icons": "capacitor-assets generate --android --assetPath resources --iconBackgroundColor \"#FDF6EC\" --splashBackgroundColor \"#FDF6EC\"",
     "android:apk": "node scripts/android-gradle.mjs assembleDebug --console=plain",
