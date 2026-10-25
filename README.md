@@ -273,6 +273,11 @@ The API rate-limits the heavy endpoints per user, in memory: tagging 40, outfit 
 and trip/week plans 30 per 10 minutes. That suits a single instance; use Redis if it scales out.
 Locally, `EXPOSE_DOCS=true` in `api/.env` turns on `/docs`.
 
+**Clock tip:** login tokens are checked against the server's clock, allowing 60 s of drift. If
+local API calls fail with 401 right after logging in, your computer's clock is off: sync it
+(Windows: Settings → Time & language → Date & time → **Sync now**), or set `JWT_LEEWAY_S=600`
+in `api/.env` for local testing only.
+
 ## Android app (Capacitor)
 
 The Android project lives in `web/android` (app id `com.eryza.aura`). Everything runs locally
