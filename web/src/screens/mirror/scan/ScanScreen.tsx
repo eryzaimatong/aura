@@ -4,7 +4,7 @@ import { ApiError, postScan } from '../../../lib/api';
 import { track } from '../../../lib/analytics';
 import { apiErrorMessage } from '../../../lib/apiErrors';
 import { useProfile } from '../../../lib/auth/context';
-import { analyzeCanvas, wipeCanvas, type AnalysisFailure, type ScanMeasurements } from '../../../lib/face/analyze';
+import { analyzeCanvas, wipeCanvas, type AnalysisFailure, type ScanDiagnostics, type ScanMeasurements } from '../../../lib/face/analyze';
 import { fileToCanvas } from '../../../lib/face/capture';
 import type { LightingIssue } from '../../../lib/face/color';
 import { AnalyzingView, type ScanStep } from './AnalyzingView';
@@ -16,7 +16,7 @@ import { ScanErrorView } from './ScanErrorView';
 type Phase =
   | { kind: 'capture' }
   | { kind: 'analyzing'; step: ScanStep }
-  | { kind: 'no_face'; reason: AnalysisFailure }
+  | { kind: 'no_face'; reason: AnalysisFailure; diagnostics?: ScanDiagnostics }
   | { kind: 'low_light'; colorConf: number; shapeConf: number; issue: LightingIssue | null }
   // Measurements (numbers only) are kept so "Try again" can resend without a new photo.
   | { kind: 'error'; message: string; retry: { measurements: ScanMeasurements; issue: LightingIssue | null } | null };
@@ -44,7 +44,7 @@ export function ScanScreen() {
       wipeCanvas(canvas);
       return setPhase({ kind: 'error', message: 'Mira couldn’t start the face reader. Check your connection and retake.', retry: null });
     }
-    if (!result.ok) return setPhase({ kind: 'no_face', reason: result.reason });
+    if (!result.ok) return setPhase({ kind: 'no_face', reason: result.reason, diagnostics: result.diagnostics });
     if (import.meta.env.DEV) console.info('[scan] measurements', result.measurements, 'lighting issue:', result.lightingIssue);
     await submit(result.measurements, result.lightingIssue);
   }
@@ -85,7 +85,7 @@ export function ScanScreen() {
       <input ref={fileInput} type="file" accept="image/*" className="hidden" onChange={(e) => void handleFile(e)} />
       {phase.kind === 'capture' && <CaptureView onCaptured={(c) => void analyze(c)} onUpload={openPicker} />}
       {phase.kind === 'analyzing' && <AnalyzingView step={phase.step} />}
-      {phase.kind === 'no_face' && <NoFaceView reason={phase.reason} onRetake={retake} onUpload={openPicker} />}
+      {phase.kind === 'no_face' && <NoFaceView reason={phase.reason} diagnostics={phase.diagnostics} onRetake={retake} onUpload={openPicker} />}
       {phase.kind === 'low_light' && (
         <LowLightView colorConf={phase.colorConf} shapeConf={phase.shapeConf} issue={phase.issue} onRetake={retake} />
       )}

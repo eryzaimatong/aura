@@ -3,7 +3,7 @@ import { Button } from '../../../components/Button';
 import { Card } from '../../../components/Card';
 import { Mira } from '../../../components/Mira';
 import { Screen } from '../../../components/Screen';
-import type { AnalysisFailure } from '../../../lib/face/analyze';
+import type { AnalysisFailure, ScanDiagnostics } from '../../../lib/face/analyze';
 
 const COPY: Record<AnalysisFailure, { title: string; fixes: [string, string, string] }> = {
   no_face: {
@@ -30,11 +30,13 @@ const COPY: Record<AnalysisFailure, { title: string; fixes: [string, string, str
 
 export interface NoFaceViewProps {
   reason: AnalysisFailure;
+  /** Shown in test builds only (npm run android:dev / android:phone), to diagnose real devices. */
+  diagnostics?: ScanDiagnostics;
   onRetake: () => void;
   onUpload: () => void;
 }
 
-export function NoFaceView({ reason, onRetake, onUpload }: NoFaceViewProps) {
+export function NoFaceView({ reason, diagnostics, onRetake, onUpload }: NoFaceViewProps) {
   const navigate = useNavigate();
   const { title, fixes } = COPY[reason];
   return (
@@ -70,6 +72,11 @@ export function NoFaceView({ reason, onRetake, onUpload }: NoFaceViewProps) {
           ))}
         </ul>
       </Card>
+      {import.meta.env.MODE === 'android' && diagnostics && (
+        <p className="mt-4 text-center text-micro text-cocoa-soft">
+          test build · {reason} · {diagnostics.delegate} · {diagnostics.width}×{diagnostics.height} · brightness {diagnostics.brightness} · faces {diagnostics.faces}
+        </p>
+      )}
     </Screen>
   );
 }

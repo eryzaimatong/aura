@@ -33,9 +33,9 @@ export function CaptureView({ onCaptured, onUpload }: CaptureViewProps) {
   const { videoRef, state } = useCamera(facing);
   const message = CAMERA_MESSAGES[state];
 
-  function shoot() {
+  async function shoot() {
     const video = videoRef.current;
-    const canvas = video ? frameToCanvas(video) : null;
+    const canvas = video ? await frameToCanvas(video) : null;
     if (canvas) onCaptured(canvas);
   }
 
@@ -74,7 +74,7 @@ export function CaptureView({ onCaptured, onUpload }: CaptureViewProps) {
           type="button"
           aria-label="Take photo"
           disabled={state !== 'live'}
-          onClick={shoot}
+          onClick={() => void shoot()}
           className="size-20 rounded-pill border-[6px] border-paper bg-gold shadow-card transition-transform active:scale-95 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-deep"
         />
         <SideButton
