@@ -2,7 +2,7 @@ import type { AuraCardRow, ColorSeason, FaceShape, ItemCategory, Seasonality, Un
 import type { ScanMeasurements } from './face/analyze';
 import { invalidateCloset } from './closet/cache';
 import { deviceHint } from './native';
-import { supabase } from './supabase';
+import { renewSession, supabase } from './supabase';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -20,7 +20,7 @@ export class ApiError extends Error {
 /** Most calls answer in a second or two; past this, a weak connection is the likely cause. */
 const DEFAULT_TIMEOUT_MS = 20_000;
 
-export async function request<T>(path: string, init?: RequestInit & { auth?: boolean; timeoutMs?: number }): Promise<T> {
+export async function request<T>(path: string, init?: RequestInit & { auth?: boolean; timeoutMs?: number }, retried = false): Promise<T> {
   const headers = new Headers(init?.headers);
   // FormData sets its own multipart boundary.
   if (!(init?.body instanceof FormData)) headers.set('Content-Type', 'application/json');
@@ -39,6 +39,10 @@ export async function request<T>(path: string, init?: RequestInit & { auth?: boo
   if (!res.ok) {
     const body: unknown = await res.json().catch(() => null);
     const detail = typeof body === 'object' && body !== null && 'detail' in body ? (body as { detail: unknown }).detail : null;
+    // Expired login the phone's clock didn't notice: renew once and retry.
+    if (init?.auth && !retried && res.status === 401 && detail === 'session_expired' && (await renewSession())) {
+      return request<T>(path, init, true);
+    }
     throw new ApiError(res.status, typeof detail === 'string' ? detail : `http_${res.status}`);
   }
   return (await res.json()) as T;

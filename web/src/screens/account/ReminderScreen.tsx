@@ -59,7 +59,7 @@ export function ReminderScreen() {
 
       {isNative && (
         <Input className="mt-4" label="Time" type="time" value={`${pad(time.hour)}:${pad(time.minute)}`} disabled={busy}
-          hint="Android may deliver it a few minutes either side, to save battery." onChange={(e) => changeTime(e.target.value)} />
+          hint="To save battery, Android may deliver it a little after this time." onChange={(e) => changeTime(e.target.value)} />
       )}
       {message && <div className="mt-4"><FormAlert message={message} /></div>}
       <p className="mt-6 text-caption text-cocoa-soft">The reminder is scheduled on this phone. Nothing about it is sent to AURA’s servers.</p>
